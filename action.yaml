@@ -107,6 +107,8 @@ runs:
       id: inspect_credentials
       shell: bash
       run: |
+        echo $AWS_ACCESS_KEY_ID
+        echo $AWS_SECRETS_ACCESS_KEY
         echo ::add-mask::${{ inputs.devops-account-id }} ;
         echo -e "Obtaining STS Caller Identity (First-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
@@ -122,6 +124,8 @@ runs:
       id: devops_assumerole
       shell: bash
       run: |
+        echo $AWS_ACCESS_KEY_ID
+        echo $AWS_SECRETS_ACCESS_KEY
         declare -a credentials=(
             aws_access_key_id~${AWS_ACCESS_KEY_ID }
             aws_secret_access_key~$${AWS_SECRET_ACCESS_KEY }
