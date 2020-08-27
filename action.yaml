@@ -118,6 +118,7 @@ runs:
       ## Update DevOps Credentials
       - name: Update DevOps Credentials
         id: update_credentials
+        shell: bash
         run: |
           declare -a credentials=(
               aws_access_key_id~${AWS_ACCESS_KEY_ID}
