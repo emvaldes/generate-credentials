@@ -1,0 +1,249 @@
+name: Generate Credentials
+description: 'Generate Credentials'
+
+####----------------------------------------------------------------------------
+inputs:
+  aws-access-key-id:
+    description: 'AWS Access Key-ID'
+    required: true
+    default: ''
+  aws-secret-access-key:
+    description: 'AWS Secret Access Key'
+    required: true
+    default: ''
+  aws-shared-credentials-file:
+    description: 'AWS Shared Credentials File'
+    required: false
+    default: '.aws/credentials'
+  aws-default-profile:
+    description: 'AWS Default Profile'
+    required: false
+    default: 'default'
+  aws-default-region:
+    description: 'AWS Default Region'
+    required: false
+    default: 'us-east-1'
+  aws-default-account:
+    description: 'AWS Default Account Number'
+    required: true
+    default: ''
+  session-timestamp:
+    description: 'Session Time-Stamp'
+    required: false
+    default: ''
+  devops-access-role:
+    description: 'DevOps Access Role'
+    required: true
+    default: 'DevOps--Custom-Access.Role'
+  devops-account-id:
+    description: 'DevOps Account ID'
+    required: false
+    default: ''
+  devops-account-name:
+    description: 'DevOps Account Name'
+    required: true
+    default: ''
+  temporary-credentials:
+    description: 'AWS Temporary Credentials'
+    required: false
+    default: false
+####----------------------------------------------------------------------------
+outputs:
+  credentials-file:
+    description: "Exporting AWS Credentials file-path"
+    value: ${{ steps.generate-credentials.outputs.credentials-file }}
+  aws-access-key-id:
+    description: "Exporting AWS Access Key-ID"
+    value: ${{ steps.generate-credentials.outputs.aws-access-key-id }}
+  aws-secret-access-key:
+    description: "Exporting AWS Secret Access Key"
+    value: ${{ steps.generate-credentials.outputs.aws-secret-access-key }}
+  aws-session-token:
+    description: "Exporting AWS Session Token"
+    value: ${{ steps.generate-credentials.outputs.aws-session-token }}
+  aws-principal-arn:
+    description: "Exporting AWS Principal ARN"
+    value: ${{ steps.generate-credentials.outputs.aws-principal-arn }}
+  aws-token-expires:
+    description: "Exporting AWS Token Expires"
+    value: ${{ steps.generate-credentials.outputs.aws-token-expires }}
+  aws-default-account:
+    description: "Exporting AWS Default Account"
+    value: ${{ steps.generate-credentials.outputs.aws-default-account }}
+####----------------------------------------------------------------------------
+runs:
+  using: "composite"
+  steps:
+    ####------------------------------------------------------------------------
+    ## Generate Credentials
+    - name: Generate Credentials
+      id: generate-credentials
+      shell: bash
+      run: |
+        ####--------------------------------------------------------------------
+        accountid="${{ inputs.devops-account-id }}" ;
+        if [[ ${#accountid} -gt 0 ]]; then
+          echo '::add-mask::${{ inputs.devops-account-id }}' ;
+        fi ;
+        ####--------------------------------------------------------------------
+        credentials="${{ inputs.aws-shared-credentials-file }}" ;
+        if [[ ${#credentials} -gt 0 ]]; then
+                export credentials="${{ github.workspace }}/${{ inputs.aws-shared-credentials-file }}" ;
+          else  export credentials="${{ github.workspace }}/.aws/credentials" ;
+        fi ;
+        ####--------------------------------------------------------------------
+        export AWS_SHARED_CREDENTIALS_FILE="${credentials}" ; unset credentials ;
+        mkdir -p ${AWS_SHARED_CREDENTIALS_FILE%\/*} ;
+        cat /dev/null > ${AWS_SHARED_CREDENTIALS_FILE} ;
+        ####--------------------------------------------------------------------
+        if [[ ${{ inputs.temporary-credentials }} == false ]]; then
+                declare -a credsfile=() ;
+                credsfile+=("[default]") ;
+                credsfile+=("aws_access_key_id = ") ;
+                credsfile+=("aws_secret_access_key = ") ;
+                credsfile+=("aws_session_token = ") ;
+                credsfile+=("x_principal_arn = ") ;
+                credsfile+=("x_security_token_expires = ") ;
+                cat /dev/null > ${AWS_SHARED_CREDENTIALS_FILE} ;
+                oIFS="${IFS}"; IFS=$'\n' ;
+                for xline in ${credsfile[@]}; do
+                  echo -e "${xline}" >> ${AWS_SHARED_CREDENTIALS_FILE} ;
+                done; IFS="${oIFS}" ;
+                ####------------------------------------------------------------
+                export timestamp="${{ inputs.session-timestamp }}" ;
+                if [[ ${#timestamp} -gt 0 ]]; then
+                        session_timestamp="${{ inputs.session-timestamp }}" ;
+                  else  session_timestamp="SessionTimestamp--$(date +"%Y%m%d%H%M%S")" ;
+                fi; unset timestamp ;
+                ####------------------------------------------------------------
+                declare -a credentials=(
+                    aws_access_key_id~${{ inputs.aws-access-key-id }}
+                    aws_secret_access_key~${{ inputs.aws-secret-access-key }}
+                  ) ;
+                echo -e "\nInjecting Default User-Credentials into AWS-Credentials file: ${AWS_SHARED_CREDENTIALS_FILE}\n" ;
+                for credential in ${credentials[@]}; do
+                  sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${AWS_SHARED_CREDENTIALS_FILE} ;
+                done ;
+                # echo -e "Shared Credentials file: \n" ;
+                # cat ${AWS_SHARED_CREDENTIALS_FILE} ; echo -e ;
+                ####------------------------------------------------------------
+                echo -e "Initiating STS Assume Role request ..." ;
+                stscli_command="$(
+                    echo aws --profile ${{ inputs.aws-default-profile }} \
+                             --region ${{ inputs.aws-default-region }} \
+                             sts assume-role \
+                             --role-arn arn:aws:iam::${{ inputs.aws-default-account }}:role/${{ inputs.devops-access-role }} \
+                             --role-session-name ${session_timestamp}
+                  )";
+                echo -en "\n> ${stscli_command} ;\n";
+                declare -a session_token=($(
+                    eval "${stscli_command} \
+                         --query 'Credentials.{aki:AccessKeyId,sak:SecretAccessKey,stk:SessionToken,sts:Expiration}' \
+                         --output text";
+                  ));
+                ####------------------------------------------------------------
+                echo -e "\nFetched STS Assumed Role Values:" ;
+                export AWS_PRINCIPAL_ARN="arn:aws:iam::${{ inputs.aws-default-account }}:user/${{ inputs.devops-account-name }}" ;
+                export AWS_DEFAULT_ACCOUNT="$(
+                    echo "${AWS_PRINCIPAL_ARN}"|cut -d':' -f5
+                  )" ;
+                ####------------------------------------------------------------
+                declare -a session_items=(
+                    AWS_ACCESS_KEY_ID
+                    AWS_SECRET_ACCESS_KEY
+                    AWS_SESSION_TOKEN
+                    AWS_TOKEN_EXPIRES
+                    AWS_PRINCIPAL_ARN
+                    AWS_DEFAULT_ACCOUNT
+                  ) ;
+                echo -e "\nConstructed Session Items [array]:\n${session_items[@]}\n" ;
+                counter=0; for xkey in "${session_token[@]}"; do
+                  eval "export ${session_items[$((counter++))]}=${xkey}" ;
+                done ;
+                ####------------------------------------------------------------
+                echo -e "Obtaining Caller Identity (Default-Role):" ;
+                aws --profile ${{ inputs.aws-default-profile }} \
+                    --region ${{ inputs.aws-default-region }} \
+                    sts get-caller-identity ;
+                ####------------------------------------------------------------
+                ## Exporting AWS Shared-Credentials file:
+                declare -a credentials=(
+                    aws_access_key_id~${AWS_ACCESS_KEY_ID}
+                    aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}
+                    aws_session_token~${AWS_SESSION_TOKEN}
+                    x_security_token_expires~${AWS_TOKEN_EXPIRES}
+                    x_principal_arn~${AWS_PRINCIPAL_ARN}
+                  ) ;
+                echo -e;
+                for credential in ${credentials[@]}; do
+                  echo -e "Injecting Credential: -> ${credential%\~*} = ${credential#*\~}" ;
+                  sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${AWS_SHARED_CREDENTIALS_FILE} ;
+                done ;
+                ####------------------------------------------------------------
+          else  for xline in ${TEMPORARY_CREDENTIALS[@]}; do
+                  echo -e ${xline} >> ${AWS_SHARED_CREDENTIALS_FILE} ;
+                done ;
+                sed -i -e 's|\(\*\)\(\=\)\(\*\)| = |g' ${AWS_SHARED_CREDENTIALS_FILE} ;
+                ####------------------------------------------------------------
+                declare -a credentials=(
+                    aws_access_key_id~AWS_ACCESS_KEY_ID
+                    aws_secret_access_key~AWS_SECRET_ACCESS_KEY
+                    aws_session_token~AWS_SESSION_TOKEN
+                    x_security_token_expires~AWS_TOKEN_EXPIRES
+                    x_principal_arn~AWS_PRINCIPAL_ARN
+                  );
+                ####------------------------------------------------------------
+                for credential in ${credentials[@]}; do
+                  property_key="${credential%\~*}";
+                  property_value="${credential#*\~}";
+                  eval $(
+                      grep "${property_key}" "${AWS_SHARED_CREDENTIALS_FILE}" \
+                      | sed -e "s|^\(${property_key} = \)\(.*\)$|export ${property_value}='\2' ;|"
+                    );
+                done;
+                export AWS_DEFAULT_ACCOUNT="$(
+                    echo "${AWS_PRINCIPAL_ARN}"|cut -d':' -f5
+                  )" ;
+                ####------------------------------------------------------------
+                echo -e ;
+                cat ${AWS_SHARED_CREDENTIALS_FILE} ;
+        fi ;
+        ####--------------------------------------------------------------------
+        echo -e "\nObtaining Caller Identity (Assumed-Role):" ;
+        aws --profile ${{ inputs.aws-default-profile }} \
+            --region ${{ inputs.aws-default-region }} \
+            sts get-caller-identity ;
+        ####--------------------------------------------------------------------
+        declare credentials=(
+            credentials-file~AWS_SHARED_CREDENTIALS_FILE~${AWS_SHARED_CREDENTIALS_FILE}
+            aws-default-profile~AWS_DEFAULT_PROFILE~default
+            aws-access-key-id~AWS_ACCESS_KEY_ID~${AWS_ACCESS_KEY_ID}
+            aws-secret-access-key~AWS_SECRET_ACCESS_KEY~${AWS_SECRET_ACCESS_KEY}
+            aws-session-token~AWS_SESSION_TOKEN~${AWS_SESSION_TOKEN}
+            aws-token-expires~AWS_TOKEN_EXPIRES~${AWS_TOKEN_EXPIRES}
+            aws-principal-arn~AWS_PRINCIPAL_ARN~${AWS_PRINCIPAL_ARN}
+            aws-default-account~AWS_DEFAULT_ACCOUNT~${AWS_DEFAULT_ACCOUNT}
+          );
+        regex="^(.*)~(.*)~(.*)$";
+        for xitem in ${credentials[@]}; do
+          if [[ ${xitem} =~ ${regex} ]]; then
+            setoutput="${BASH_REMATCH[1]}";
+            environment="${BASH_REMATCH[2]}";
+            credential="${BASH_REMATCH[3]}";
+            ## echo -e "Exporting '${environment}' [ ${credential} ]" ;
+            eval "echo \"::set-output name=${environment}::${credential}\"" ;
+            eval "echo \"::set-env name=${environment}::${credential}\"" ;
+          fi ;
+        done ;
+        # ####--------------------------------------------------------------------
+        # echo "1) ${AWS_SHARED_CREDENTIALS_FILE}" ;
+        # echo "2) ${AWS_DEFAULT_PROFILE}" ;
+        # echo "3) ${AWS_ACCESS_KEY_ID}" ;
+        # echo "4) ${AWS_SECRET_ACCESS_KEY}" ;
+        # echo "5) ${AWS_SESSION_TOKEN}" ;
+        # echo "6) ${AWS_TOKEN_EXPIRES}" ;
+        # echo "7) ${AWS_PRINCIPAL_ARN}" ;
+        # echo "8) ${AWS_DEFAULT_ACCOUNT}" ;
+        ####--------------------------------------------------------------------
+        echo -e "\nCompleted! " ;
+        ####--------------------------------------------------------------------
