@@ -66,15 +66,15 @@ runs:
             aws_access_key_id~${{ inputs.aws-access-key-id }}
             aws_secret_access_key~${{ inputs.aws-secret-access-key }}
           ) ;
-        echo -e "\nDefault Credentials:\n${credentials[@]}" ;
+        ## echo -e "\nDefault Credentials:\n${credentials[@]}" ;
         echo -e "\nInjecting Default User-Credentials into AWS-Credentials file! \n" ;
         for credential in ${credentials[@]}; do
-          echo -e "Injecting Default User-Credential: ${credential%\~*} = ${credential#*\~} ..." ;
+          ## echo -e "Injecting Default User-Credential: ${credential%\~*} = ${credential#*\~} ..." ;
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
         done ;
-        echo -e "\nDisplay Default User-Credentails (file):" ;
-        cat ${{ inputs.aws-shared-credentials-file }} ;
-        echo -e "\nInitiating STS Assume Role request ..." ;
+        ## echo -e "\nDisplay Default User-Credentails (file):" ;
+        ## cat ${{ inputs.aws-shared-credentials-file }} ;
+        echo -e "\nInitiating STS Assume Role request ...\n" ;
         declare -a session_token=($(
             aws --profile ${{ inputs.aws-default-profile }} \
                 --region ${{ inputs.aws-default-region }} \
@@ -84,8 +84,8 @@ runs:
                 --query 'Credentials.{aki:AccessKeyId,sak:SecretAccessKey,stk:SessionToken,sts:Expiration}' \
                 --output text
              )) ;
-        echo -e "Fetched STS Assumed Role Values:" ;
-        echo -e "Session Token:\n${session_token[@]}" ;
+        ## echo -e "Fetched STS Assumed Role Values:\n" ;
+        ## echo -e "Session Token:\n${session_token[@]}" ;
         declare -a session_items=(AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_TOKEN_EXPIRES) ;
         echo -e "\nConstructed Session Items [array]:\n${session_items[@]}\n" ;
         counter=0; for xkey in "${session_token[@]}"; do
@@ -105,7 +105,6 @@ runs:
       id: inspect_credentials
       shell: bash
       run: |
-        echo -e "*** ${{ inputs.aws-shared-credentials-file }} ***";
         echo ::add-mask::${{ inputs.devops-account-id }} ;
         echo -e "Obtaining STS Caller Identity (First-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
@@ -121,7 +120,6 @@ runs:
       id: devops_assumerole
       shell: bash
       run: |
-        echo -e "*** ${{ inputs.aws-shared-credentials-file }} ***";
         declare -a credentials=(
             aws_access_key_id~${AWS_ACCESS_KEY_ID}
             aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}
@@ -129,12 +127,12 @@ runs:
             x_principal_arn~arn:aws:iam::${{ inputs.aws-default-account }}:user/${{ inputs.devops-account-name }}
             x_security_token_expires~${AWS_TOKEN_EXPIRES}
           ) ;
-        echo -e "Displaying Latest Credentials:\n${credentials[@]}\n" ;
+        ## echo -e "Displaying Latest Credentials:\n${credentials[@]}\n" ;
         for credential in ${credentials[@]}; do
-          echo -e "Injecting Latest Credential:\n${credential%\~*} = ${credential#*\~} ..." ;
+          ## echo -e "Injecting Latest Credential:\n${credential%\~*} = ${credential#*\~} ..." ;
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
         done ;
-        echo -e "\nDisplaying Enviroment Settings ..." ;
+        echo -e "\nDisplaying Enviroment Settings ...\n" ;
         echo -e "Terraform Cloud-Region: ${AWS_DEFAULT_REGION} \n" ;
         echo -e "AWS Target Account: ${AWS_DEFAULT_ACCOUNT}" ;
         echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
@@ -150,7 +148,6 @@ runs:
       id: confirm_credentials
       shell: bash
       run: |
-        echo -e "*** ${{ inputs.aws-shared-credentials-file }} ***";
         echo -e "Obtaining Caller Identity (Second-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
