@@ -42,6 +42,7 @@ runs:
         echo -e "${GITHUB_API_URL}";      ##		Returns the API URL. For example: https://api.github.com.
         echo -e "${GITHUB_GRAPHQL_URL}";  ##		Returns the GraphQL API URL. For example: https://api.github.com/graphql.
         echo -e "\nAction Plan: ${{ github.action_path }}";
+        echo -e "\n\nTesting [length]: ${#DEVOPS_ACCESS_ROLE}\n\n";
         ## ./goodbye.sh;
 
       shell: bash
