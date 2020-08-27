@@ -99,14 +99,14 @@ runs:
         echo -e "\nDisplaying: set\n";
         set;
 ####----------------------------------------------------------------------------
-      ## Inspect Credentials
-      - name: Inspecting User Credentials
-        id: inspect_credentials
-        shell: bash
-        run: |
-          echo ::add-mask::${{ inputs.devops-account-id }} ;
-          echo -e "Obtaining STS Caller Identity (First-Time)" ;
-          aws --profile ${{ inputs.aws-default-profile }} \
-              --region ${{ inputs.aws-default-region }} \
-              sts get-caller-identity \
-              --debug ;
+    ## Inspect Credentials
+    - name: Inspecting User Credentials
+      id: inspect_credentials
+      shell: bash
+      run: |
+        echo ::add-mask::${{ inputs.devops-account-id }} ;
+        echo -e "Obtaining STS Caller Identity (First-Time)" ;
+        aws --profile ${{ inputs.aws-default-profile }} \
+            --region ${{ inputs.aws-default-region }} \
+            sts get-caller-identity \
+            --debug ;
