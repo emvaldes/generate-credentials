@@ -104,8 +104,8 @@ runs:
       run: |
         export AWS_ACCESS_KEY_ID="${{ env.AWS_ACCESS_KEY_ID }}" ;
         export AWS_SECRETS_ACCESS_KEY="${{ env.AWS_SECRETS_ACCESS_KEY }}" ;
-        echo -e "Test-0: ${AWS_ACCESS_KEY_ID}";
-        echo -e "Test-0: ${AWS_SECRETS_ACCESS_KEY}";
+        echo -e "AWS_ACCESS_KEY_ID-0: ${AWS_ACCESS_KEY_ID}";
+        echo -e "AWS_SECRET_ACCESS_KEY-0: ${AWS_SECRETS_ACCESS_KEY}";
 #       continue-on-error: false
 #     - name: Check On Failures
 #       if: steps.generate_credentials.outputs.status == 'failure'
@@ -116,8 +116,8 @@ runs:
       id: inspect_credentials
       shell: bash
       run: |
-        echo -e "Test-1: ${AWS_ACCESS_KEY_ID}";
-        echo -e "Test-2: ${AWS_SECRETS_ACCESS_KEY}";
+        echo -e "AWS_ACCESS_KEY_ID-1: ${AWS_ACCESS_KEY_ID}";
+        echo -e "AWS_SECRET_ACCESS_KEY-2: ${AWS_SECRETS_ACCESS_KEY}";
         echo ::add-mask::${{ inputs.devops-account-id }} ;
         echo -e "Obtaining STS Caller Identity (First-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
@@ -133,8 +133,8 @@ runs:
       id: devops_assumerole
       shell: bash
       run: |
-        echo -e "Test-3: ${AWS_ACCESS_KEY_ID}";
-        echo -e "Test-4: ${AWS_SECRETS_ACCESS_KEY}";
+        echo -e "AWS_ACCESS_KEY_ID-3: ${AWS_ACCESS_KEY_ID}";
+        echo -e "AWS_SECRET_ACCESS_KEY-4: ${AWS_SECRETS_ACCESS_KEY}";
         declare -a credentials=(
             aws_access_key_id~${AWS_ACCESS_KEY_ID }
             aws_secret_access_key~$${AWS_SECRET_ACCESS_KEY }
@@ -163,8 +163,8 @@ runs:
       id: confirm_credentials
       shell: bash
       run: |
-        echo -e "Test-5: ${AWS_ACCESS_KEY_ID}";
-        echo -e "Test-6: ${AWS_SECRETS_ACCESS_KEY}";
+        echo -e "AWS_ACCESS_KEY_ID-5: ${AWS_ACCESS_KEY_ID}";
+        echo -e "AWS_SECRET_ACCESS_KEY-6: ${AWS_SECRETS_ACCESS_KEY}";
         echo -e "Obtaining Caller Identity (Second-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
