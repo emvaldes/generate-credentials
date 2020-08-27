@@ -18,6 +18,24 @@ runs:
       run: echo "::set-output name=random-id::$(echo $RANDOM)"
       shell: bash
     - run: |
+        echo -e "AWS_ACCESS_KEYPAIR: ${{ secrets.AWS_ACCESS_KEYPAIR }}";
+        echo -e "AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}";
+
+        echo -e "AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ASSUME_ROLE }}";
+
+        echo -e "AWS_DEFAULT_ACCOUNT: ${{ secrets.AWS_DEFAULT_ACCOUNT }}";
+        echo -e "AWS_DEFAULT_PROFILE: ${{ secrets.AWS_DEFAULT_PROFILE }}";
+        echo -e "AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}";
+        echo -e "AWS_DEPLOY_TERRAFORM: ${{ secrets.AWS_DEPLOY_TERRAFORM }}";
+        echo -e "AWS_DESTROY_TERRAFORM: ${{ secrets.AWS_DESTROY_TERRAFORM }}";
+        echo -e "AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}";
+        echo -e "DEVOPS_ACCESS_POLICY: ${{ secrets.DEVOPS_ACCESS_POLICY }}";
+        echo -e "DEVOPS_ACCESS_ROLE: ${{ secrets.DEVOPS_ACCESS_ROLE }}";
+        echo -e "DEVOPS_ACCOUNT_ID: ${{ secrets.DEVOPS_ACCOUNT_ID }}";
+        echo -e "DEVOPS_ACCOUNT_NAME: ${{ secrets.DEVOPS_ACCOUNT_NAME }}";
+        echo -e "INSPECT_DEPLOYMENT: ${{ secrets.INSPECT_DEPLOYMENT }}";
+        echo -e "UPDATE_PYTHON_LATEST: ${{ secrets.UPDATE_PYTHON_LATEST }}";
+        echo -e "UPDATE_SYSTEM_LATEST: ${{ secrets.UPDATE_SYSTEM_LATEST }}";
         echo -e "\nListing: env";
         env|sort -n;
         echo -e "\nListing: set";
