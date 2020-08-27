@@ -1,29 +1,3 @@
-# AWS STS - Generate Credentials
-GitHub Actions - AWS STS Generate Credentials - Role As A Service (RaaS)
-
-![GitHub Actions - AWS STS Assume Role](https://github.com/emvaldes/raas/workflows/GitHub%20Actions%20-%20AWS%20STS%20Assume%20Role/badge.svg)
-
-**<span style="color:red">1</span>** -) Create a Public|Private GitHub Repository for your project
-
-**<span style="color:red">2</span>** -) Inject your project into your GitHub Repository
-
-**<span style="color:red">3</span>** -) Create the GitHub Secrets to store sensitive|private data
-
-```console
-AWS_ACCESS_KEY_ID:      Terraform AWS Access Key-Id (e.g.: AKIA2...VT7DU).
-AWS_DEFAULT_ACCOUNT:    The AWS Account number (e.g.: 123456789012).
-AWS_DEFAULT_REGION:     The AWS Default Region (e.g.: us-east-1)
-AWS_SECRET_ACCESS_KEY:  Terraform AWS Secret Access Key (e.g.: zBqDUNyQ0G...IbVyamSCpe)
-DEVOPS_ACCESS_ROLE:     Defines the STS Assume-Role for the Terraform user.
-DEVOPS_ACCOUNT_ID:      It's intended to mask the AWS IAM User-ID when it gets listed.
-DEVOPS_ACCOUNT_NAME:    A placeholder for the Deployment Service Account's name (terraform).
-```
-**<span style="color:red">4</span>** -) Create a GitHub Action - Pipeline to deploy your project: .github/workflows/main.yaml <br>
-**Note**: This is just a prototype of how to use this GitHub Action (uses: emvaldes/raas@v1.0)
-
-[Pipeline Deployment](https://github.com/emvaldes/generate-credentials/blob/master/.github/workflows/main.yaml)
-
-```console
 name: GitHub Actions - AWS STS Generate Credentials
 ## on: [push]
 on:
@@ -70,6 +44,10 @@ jobs:
           ls -l /usr/local/bin/aws ;
           sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update ;
           aws --version ;
+        continue-on-error: false
+      - name: Check On Failures
+        if: steps.update_awscli.outputs.status == 'failure'
+        run: echo "${{ steps.update_awscli.outputs.status }}" ;
 ####----------------------------------------------------------------------------
       - name: AWS STS Assume Role
         uses: ./
@@ -82,6 +60,10 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           devops-access-role: ${{ env.DEVOPS_ACCESS_ROLE }}
           devops-account-name: ${{ env.DEVOPS_ACCOUNT_NAME }}
+        continue-on-error: false
+      - name: Check On Failures
+        if: steps.request_credentials.outputs.status == 'failure'
+        run: echo "${{ steps.request_credentials.outputs.status }}" ;
 ####----------------------------------------------------------------------------
       ## Display Environment
       - name: Display Environment
@@ -100,42 +82,7 @@ jobs:
           --region ${AWS_DEFAULT_REGION} \
           iam list-users \
           --query 'Users[?UserName==`'${DEVOPS_ACCOUNT_NAME}'`]' ;
-```
-
-**<span style="color:red">4</span>** -) The output will be like this: [Pipeline Execution](https://github.com/emvaldes/generate-credentials/runs/1045744474?check_suite_focus=true)
-
-```console
-Injecting Default User-Credentials into AWS-Credentials file: /home/runner/work/generate-credentials/generate-credentials/.aws/credentials
-
-Initiating STS Assume Role request ...
-aws --profile default --region *** sts assume-role --role-arn arn:aws:iam::***:role/*** --role-session-name DevOpsPipeline--20200827193000
-
-Fetched STS Assumed Role Values:
-
-Constructed Session Items [array]:
-AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_TOKEN_EXPIRES
-
-Obtaining Caller Identity (Default-Role):
-{
-    "UserId": "AIDASGOVRMFDVKZVUNYLN",
-    "Account": "***",
-    "Arn": "arn:aws:iam::***:user/***"
-}
-
-Injecting Credential: -> aws_access_key_id = ASIAx...xCG77
-Injecting Credential: -> aws_secret_access_key = 4U0Vx...xgUjq
-Injecting Credential: -> aws_session_token = IQoJx...xdTY=
-Injecting Credential: -> x_principal_arn = arn:aws:iam::***:user/***
-Injecting Credential: -> x_security_token_expires = 2020-08-29T19:08:49+00:00
-
-Obtaining Caller Identity (Assumed-Role):
-{
-    "UserId": "AROAx...xMOJH:DevOpsPipeline--20200101000000",
-    "Account": "***",
-    "Arn": "arn:aws:sts::***:assumed-role/***/DevOpsPipeline--20200101000000"
-}
-
-Completed! 
-```
-
-Happy Coding & Share your work!
+        continue-on-error: false
+      - name: Check On Failures
+        if: steps.display_listusers.outputs.status == 'failure'
+        run: echo "${{ steps.display_listusers.outputs.status }}" ;
