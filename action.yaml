@@ -5,6 +5,10 @@ inputs:
     description: 'Who to greet'
     required: true
     default: 'World'
+  devops-access-role:
+    description: 'DevOps Access Role name'
+    required: true
+    default: ''
 outputs:
   random-number: 
     description: "Random number"
@@ -42,7 +46,7 @@ runs:
         echo -e "${GITHUB_API_URL}";      ##		Returns the API URL. For example: https://api.github.com.
         echo -e "${GITHUB_GRAPHQL_URL}";  ##		Returns the GraphQL API URL. For example: https://api.github.com/graphql.
         echo -e "\nAction Plan: ${{ github.action_path }}";
-        echo -e "\n\nTesting [length]: ${#DEVOPS_ACCESS_ROLE}\n\n";
+        echo -e "\n\nTesting [length]: ${{ inputs.devops-access-role }}\n\n";
         ## ./goodbye.sh;
 
       shell: bash
