@@ -67,14 +67,14 @@ runs:
             aws_secret_access_key~${{ inputs.aws-secret-access-key }}
           ) ;
         ## echo -e "\nDefault Credentials:\n${credentials[@]}" ;
-        echo -e "\nInjecting Default User-Credentials into AWS-Credentials file! \n" ;
+        echo -e "\nInjecting Default User-Credentials into AWS-Credentials file! " ;
         for credential in ${credentials[@]}; do
           ## echo -e "Injecting Default User-Credential: ${credential%\~*} = ${credential#*\~} ..." ;
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
         done ;
         ## echo -e "\nDisplay Default User-Credentails (file):" ;
         ## cat ${{ inputs.aws-shared-credentials-file }} ;
-        echo -e "\nInitiating STS Assume Role request ...\n" ;
+        echo -e "Initiating STS Assume Role request ..." ;
         declare -a session_token=($(
             aws --profile ${{ inputs.aws-default-profile }} \
                 --region ${{ inputs.aws-default-region }} \
@@ -84,7 +84,7 @@ runs:
                 --query 'Credentials.{aki:AccessKeyId,sak:SecretAccessKey,stk:SessionToken,sts:Expiration}' \
                 --output text
              )) ;
-        ## echo -e "Fetched STS Assumed Role Values:\n" ;
+        echo -e "Fetched STS Assumed Role Values:" ;
         ## echo -e "Session Token:\n${session_token[@]}" ;
         declare -a session_items=(AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_TOKEN_EXPIRES) ;
         echo -e "\nConstructed Session Items [array]:\n${session_items[@]}\n" ;
