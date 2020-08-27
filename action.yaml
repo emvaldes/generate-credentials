@@ -57,6 +57,7 @@ runs:
       id: generate_credentials
       shell: bash
       run: |
+        echo -e "*** ${{ inputs.aws-shared-credentials-file }} ***";
         if [[ ${{ inputs.session-timestamp }} == '' ]]; then
                 session_timestamp="DevOpsPipeline--$(date +"%Y%m%d%H%M%S")";
           else  session_timestamp="${{ inputs.session-timestamp }}";
@@ -104,6 +105,7 @@ runs:
       id: inspect_credentials
       shell: bash
       run: |
+        echo -e "*** ${{ inputs.aws-shared-credentials-file }} ***";
         echo ::add-mask::${{ inputs.devops-account-id }} ;
         echo -e "Obtaining STS Caller Identity (First-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
@@ -119,6 +121,7 @@ runs:
       id: devops_assumerole
       shell: bash
       run: |
+        echo -e "*** ${{ inputs.aws-shared-credentials-file }} ***";
         declare -a credentials=(
             aws_access_key_id~${AWS_ACCESS_KEY_ID}
             aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}
@@ -126,11 +129,17 @@ runs:
             x_principal_arn~arn:aws:iam::${{ inputs.aws-default-account }}:user/${{ inputs.devops-account-name }}
             x_security_token_expires~${AWS_TOKEN_EXPIRES}
           ) ;
-        ## echo -e "Displaying Latest Credentials:\n${credentials[@]}\n" ;
+        echo -e "Displaying Latest Credentials:\n${credentials[@]}\n" ;
         for credential in ${credentials[@]}; do
-          ## echo -e "Injecting Latest Credential:\n${credential%\~*} = ${credential#*\~} ..." ;
+          echo -e "Injecting Latest Credential:\n${credential%\~*} = ${credential#*\~} ..." ;
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
         done ;
+        echo -e "\nDisplaying Enviroment Settings ..." ;
+        echo -e "Terraform Cloud-Region: ${AWS_DEFAULT_REGION} \n" ;
+        echo -e "AWS Target Account: ${AWS_DEFAULT_ACCOUNT}" ;
+        echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
+        echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
+        echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
 #       continue-on-error: false
 #     - name: Check On Failures
 #       if: steps.devops_assumerole.outputs.status == 'failure'
@@ -141,6 +150,7 @@ runs:
       id: confirm_credentials
       shell: bash
       run: |
+        echo -e "*** ${{ inputs.aws-shared-credentials-file }} ***";
         echo -e "Obtaining Caller Identity (Second-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
@@ -155,8 +165,8 @@ runs:
       id: validate_awscli
       shell: bash
       run: |
-        ## echo -e "Listing Current Credentials Configurations ..." ;
-        ## cat ${{ inputs.aws-shared-credentials-file }} ;
+        echo -e "Listing Current Credentials Configurations ..." ;
+        cat ${{ inputs.aws-shared-credentials-file }} ;
         aws configure list ;
         echo ::add-mask::${{ env.devops-account-id }} ;
         echo -e "\nListing IAM Users (Assumed-Role):" ;
