@@ -95,6 +95,8 @@ runs:
         done ;
         ## Displaying Shared-Credentials file:
         echo "::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}" ;
+        export AWS_ACCESS_KEY_ID="${{ steps.generate_credentials.outputs.AWS_ACCESS_KEY_ID }}" ;
+        export AWS_SECRETS_ACCESS_KEY="${{ steps.generate_credentials.outputs.AWS_SECRETS_ACCESS_KEY }}" ;
 #       continue-on-error: false
 #     - name: Check On Failures
 #       if: steps.generate_credentials.outputs.status == 'failure'
@@ -121,8 +123,8 @@ runs:
       shell: bash
       run: |
         declare -a credentials=(
-            aws_access_key_id~${AWS_ACCESS_KEY_ID}
-            aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}
+            aws_access_key_id~${AWS_ACCESS_KEY_ID }
+            aws_secret_access_key~$${AWS_SECRET_ACCESS_KEY }
             aws_session_token~${AWS_SESSION_TOKEN}
             x_principal_arn~arn:aws:iam::${{ inputs.aws-default-account }}:user/${{ inputs.devops-account-name }}
             x_security_token_expires~${AWS_TOKEN_EXPIRES}
