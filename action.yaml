@@ -44,7 +44,7 @@ inputs:
     default: ''
 ####----------------------------------------------------------------------------
 outputs:
-  display-configuration:
+  credentials-file:
     description: "Displaying AWS STS Assume-Role Configurations"
     value: ${{ steps.generate_credentials.outputs.credentials-file }}
 ####----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ runs:
           eval "echo '::set-env name=${session_items[$((counter++))]}::${xkey}'" ;
         done ;
         ## Displaying Shared-Credentials file:
-        echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
+        echo "::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}" ;
 #       continue-on-error: false
 #     - name: Check On Failures
 #       if: steps.generate_credentials.outputs.status == 'failure'
