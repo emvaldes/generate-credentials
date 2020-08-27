@@ -93,8 +93,8 @@ runs:
           echo -e "Exporting Session Variables: ${session_items[${counter}]} = ${xkey}" ;
           eval "echo '::set-env name=${session_items[$((counter++))]}::${xkey}'" ;
         done ;
-      - name: testxyz
-        run: |
+    - name: testxyz
+      run: |
         ## Displaying Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
         export AWS_ACCESS_KEY_ID="${{ env.AWS_ACCESS_KEY_ID }}" ;
