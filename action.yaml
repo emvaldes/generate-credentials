@@ -94,10 +94,10 @@ runs:
         done ;
         ## Displaying Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
-      continue-on-error: false
-    - name: Check On Failures
-      if: steps.generate_credentials.outputs.status == 'failure'
-      run: echo "${{ steps.generate_credentials.outputs.status }}" ;
+#       continue-on-error: false
+#     - name: Check On Failures
+#       if: steps.generate_credentials.outputs.status == 'failure'
+#       run: echo "${{ steps.generate_credentials.outputs.status }}" ;
 ####----------------------------------------------------------------------------
     ## Inspect Credentials
     - name: Inspecting User Credentials
@@ -109,10 +109,10 @@ runs:
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
             sts get-caller-identity ;
-      continue-on-error: false
-    - name: Check On Failures
-      if: steps.inspect_credentials.outputs.status == 'failure'
-      run: echo "${{ steps.inspect_credentials.outputs.status }}" ;
+#       continue-on-error: false
+#     - name: Check On Failures
+#       if: steps.inspect_credentials.outputs.status == 'failure'
+#       run: echo "${{ steps.inspect_credentials.outputs.status }}" ;
 ####----------------------------------------------------------------------------
     ## DevOps Assume-Role
     - name: DevOps Assume-Role
@@ -131,10 +131,10 @@ runs:
           ## echo -e "Injecting Latest Credential:\n${credential%\~*} = ${credential#*\~} ..." ;
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
         done ;
-      continue-on-error: false
-    - name: Check On Failures
-      if: steps.devops_assumerole.outputs.status == 'failure'
-      run: echo "${{ steps.devops_assumerole.outputs.status }}" ;
+#       continue-on-error: false
+#     - name: Check On Failures
+#       if: steps.devops_assumerole.outputs.status == 'failure'
+#       run: echo "${{ steps.devops_assumerole.outputs.status }}" ;
 ####----------------------------------------------------------------------------
     ## Confirm Credentials
     - name: Confirming User Credentials
@@ -145,10 +145,10 @@ runs:
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
             sts get-caller-identity ;
-      continue-on-error: false
-    - name: Check On Failures
-      if: steps.confirm_credentials.outputs.status == 'failure'
-      run: echo "${{ steps.confirm_credentials.outputs.status }}" ;
+#       continue-on-error: false
+#     - name: Check On Failures
+#       if: steps.confirm_credentials.outputs.status == 'failure'
+#       run: echo "${{ steps.confirm_credentials.outputs.status }}" ;
 ####----------------------------------------------------------------------------
     ## Validating AWS CLI
     - name: Validating AWS CLI
@@ -164,8 +164,8 @@ runs:
             --region ${{ inputs.aws-default-region }} \
             iam list-users \
             --query 'Users[?UserName==`'${{ inputs.devops-account-name }}'`]' ;
-      continue-on-error: false
-    - name: Check On Failures
-      if: steps.validate_awscli.outputs.status == 'failure'
-      run: echo "${{ steps.validate_awscli.outputs.status }}" ;
+#       continue-on-error: false
+#     - name: Check On Failures
+#       if: steps.validate_awscli.outputs.status == 'failure'
+#       run: echo "${{ steps.validate_awscli.outputs.status }}" ;
 ####----------------------------------------------------------------------------
