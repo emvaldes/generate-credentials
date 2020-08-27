@@ -95,6 +95,8 @@ runs:
         done ;
         ## Displaying Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
+        env;
+        set;
 ####----------------------------------------------------------------------------
     - name: testxyz
       id: testxyz
