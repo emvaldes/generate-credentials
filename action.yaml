@@ -19,7 +19,7 @@ runs:
       shell: bash
     - run: |
         echo -e;
-        echo -e "AWS Assume-Role: ${{ secrets.AWS_ASSUME_ROLE }}";
+        ## echo -e "AWS Assume-Role: ${{ secrets.AWS_ASSUME_ROLE }}";
         echo -e "AWS_ACCESS_KEYPAIR: ${{ secrets.AWS_ACCESS_KEYPAIR }}";
         echo -e "AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}";
         echo -e "AWS_DEFAULT_ACCOUNT: ${{ secrets.AWS_DEFAULT_ACCOUNT }}";
