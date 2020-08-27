@@ -1,5 +1,6 @@
 name: 'AWS STS Assume-Role'
 description: 'Auto-Generate AWS STS Assume-Role'
+####----------------------------------------------------------------------------
 inputs:
   aws-access-key-id:
     description: 'AWS Access Key-ID'
@@ -22,25 +23,35 @@ inputs:
     required: true
     default: 'us-east-1'
   aws-default-account:
-    description: 'AWS Default Account'
+    description: 'AWS Default Account Number'
+    required: true
+    default: ''
+  session-timestamp:
+    description: 'Session Time-Stamp'
     required: true
     default: ''
   devops-access-role:
     description: 'DevOps Access Role'
     required: true
     default: 'DevOps--Custom-Access.Role'
-  session-timestamp:
-    description: 'Session Time-Stamp'
+  devops-account-id:
+    description: 'DevOps Account ID'
+    required: true
+    default: 'DevOps--Custom-Access.Role'
+  devops-account-name:
+    description: 'DevOps Account Name'
     required: true
     default: ''
+####----------------------------------------------------------------------------
 outputs:
   display-configuration:
     description: "Displaying AWS STS Assume-Role Configurations"
     value: ${{ steps.generate_credentials.outputs.credentials-file }}
+####----------------------------------------------------------------------------
 runs:
   using: "composite"
   steps: 
-
+####----------------------------------------------------------------------------
     ## General Credentials
     - name: Generate Credentials
       id: generate_credentials
@@ -82,5 +93,79 @@ runs:
           eval "echo '::set-env name=${session_items[$((counter++))]}::${xkey}'" ;
         done ;
         ## Displaying Shared-Credentials file:
-        ## echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
-        echo '::set-output name=credentials-file::testing' ;
+        echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
+      continue-on-error: false
+    - name: Check On Failures
+      if: steps.generate_credentials.outputs.status == 'failure'
+      run: echo "${{ steps.generate_credentials.outputs.status }}" ;
+####----------------------------------------------------------------------------
+    ## Inspect Credentials
+    - name: Inspecting User Credentials
+      id: inspect_credentials
+      shell: bash
+      run: |
+        echo ::add-mask::${{ inputs.devops-account-id }} ;
+        echo -e "Obtaining STS Caller Identity (First-Time)" ;
+        aws --profile ${{ inputs.aws-default-profile }} \
+            --region ${{ inputs.aws-default-region }} \
+            sts get-caller-identity ;
+      continue-on-error: false
+    - name: Check On Failures
+      if: steps.inspect_credentials.outputs.status == 'failure'
+      run: echo "${{ steps.inspect_credentials.outputs.status }}" ;
+####----------------------------------------------------------------------------
+    ## DevOps Assume-Role
+    - name: DevOps Assume-Role
+      id: devops_assumerole
+      shell: bash
+      run: |
+        declare -a credentials=(
+            aws_access_key_id~${AWS_ACCESS_KEY_ID}
+            aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}
+            aws_session_token~${AWS_SESSION_TOKEN}
+            x_principal_arn~arn:aws:iam::${{ inputs.aws-default-account }}:user/${{ inputs.devops-account-name }}
+            x_security_token_expires~${AWS_TOKEN_EXPIRES}
+          ) ;
+        ## echo -e "Displaying Latest Credentials:\n${credentials[@]}\n" ;
+        for credential in ${credentials[@]}; do
+          ## echo -e "Injecting Latest Credential:\n${credential%\~*} = ${credential#*\~} ..." ;
+          sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
+        done ;
+      continue-on-error: false
+    - name: Check On Failures
+      if: steps.devops_assumerole.outputs.status == 'failure'
+      run: echo "${{ steps.devops_assumerole.outputs.status }}" ;
+####----------------------------------------------------------------------------
+    ## Confirm Credentials
+    - name: Confirming User Credentials
+      id: confirm_credentials
+      shell: bash
+      run: |
+        echo -e "Obtaining Caller Identity (Second-Time)" ;
+        aws --profile ${{ inputs.aws-default-profile }} \
+            --region ${{ inputs.aws-default-region }} \
+            sts get-caller-identity ;
+      continue-on-error: false
+    - name: Check On Failures
+      if: steps.confirm_credentials.outputs.status == 'failure'
+      run: echo "${{ steps.confirm_credentials.outputs.status }}" ;
+####----------------------------------------------------------------------------
+    ## Validating AWS CLI
+    - name: Validating AWS CLI
+      id: validate_awscli
+      shell: bash
+      run: |
+        ## echo -e "Listing Current Credentials Configurations ..." ;
+        ## cat ${{ inputs.aws-shared-credentials-file }} ;
+        aws configure list ;
+        echo ::add-mask::${{ env.devops-account-id }} ;
+        echo -e "\nListing IAM Users (Assumed-Role):" ;
+        aws --profile ${{ inputs.aws-default-profile }} \
+            --region ${{ inputs.aws-default-region }} \
+            iam list-users \
+            --query 'Users[?UserName==`'${{ inputs.devops-account-name }}'`]' ;
+      continue-on-error: false
+    - name: Check On Failures
+      if: steps.validate_awscli.outputs.status == 'failure'
+      run: echo "${{ steps.validate_awscli.outputs.status }}" ;
+####----------------------------------------------------------------------------
