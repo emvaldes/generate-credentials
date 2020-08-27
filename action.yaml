@@ -115,20 +115,20 @@ runs:
             sts get-caller-identity ;
             ## --debug ;
 ####----------------------------------------------------------------------------
-      ## Update DevOps Credentials
-      - name: Update DevOps Credentials
-        id: update_credentials
-        shell: bash
-        run: |
-          declare -a credentials=(
-              aws_access_key_id~${AWS_ACCESS_KEY_ID}
-              aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}
-              aws_session_token~${AWS_SESSION_TOKEN}
-              x_principal_arn~arn:aws:iam::${{ inputs.aws-default-account }}:user/${{ inputs.devops-account-name }}
-              x_security_token_expires~${AWS_TOKEN_EXPIRES}
-            ) ;
-          ## echo -e "Displaying Latest Credentials:\n${credentials[@]}\n" ;
-          for credential in ${credentials[@]}; do
-            ## echo -e "Injecting Latest Credential:\n${credential%\~*} = ${credential#*\~} ..." ;
-            sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.${{ inputs.aws-shared-credentials-file }} }} ;
-          done ;
+    ## Update DevOps Credentials
+    - name: Update DevOps Credentials
+      id: update_credentials
+      shell: bash
+      run: |
+        declare -a credentials=(
+            aws_access_key_id~${AWS_ACCESS_KEY_ID}
+            aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}
+            aws_session_token~${AWS_SESSION_TOKEN}
+            x_principal_arn~arn:aws:iam::${{ inputs.aws-default-account }}:user/${{ inputs.devops-account-name }}
+            x_security_token_expires~${AWS_TOKEN_EXPIRES}
+          ) ;
+        ## echo -e "Displaying Latest Credentials:\n${credentials[@]}\n" ;
+        for credential in ${credentials[@]}; do
+          ## echo -e "Injecting Latest Credential:\n${credential%\~*} = ${credential#*\~} ..." ;
+          sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.${{ inputs.aws-shared-credentials-file }} }} ;
+        done ;
