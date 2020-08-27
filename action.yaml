@@ -12,15 +12,12 @@ outputs:
 runs:
   using: "composite"
   steps: 
-    env:
-      AWS_ACCESS_KEYPAIR: ${{ secrets.AWS_ACCESS_KEYPAIR }};
     - run: echo Hello ${{ inputs.who-to-greet }}.
       shell: bash
     - id: random-number-generator
       run: echo "::set-output name=random-id::$(echo $RANDOM)"
       shell: bash
     - run: |
-        echo -e "${{ env.AWS_ACCESS_KEYPAIR }}";
         echo -e "\nListing: env";
         env|sort -n;
         echo -e "\nListing: set";
