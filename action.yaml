@@ -48,6 +48,7 @@ runs:
     ## General Credentials
     - name: Generate Credentials
       id: generate_credentials
+      shell: bash
       run: |
         declare -a credentials=(
             aws_access_key_id~${{ inputs.aws-access-key-id }}
