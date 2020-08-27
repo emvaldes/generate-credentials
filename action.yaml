@@ -45,16 +45,16 @@ inputs:
 ####----------------------------------------------------------------------------
 outputs:
   credentials-file:
-    description: "Displaying AWS STS Assume-Role Configurations"
-    value: ${{ steps.generate_credentials.outputs.credentials-file }}
+    description: "Displaying AWS Credentials file-path"
+    value: ${{ steps.assume_credentials.outputs.credentials-file }}
 ####----------------------------------------------------------------------------
 runs:
   using: "composite"
   steps: 
 ####----------------------------------------------------------------------------
-    ## General Credentials
-    - name: Generate Credentials
-      id: generate_credentials
+    ## AWS STS Assume Role
+    - name: AWS STS Assume Role
+      id: assume_credentials
       shell: bash
       run: |
         if [[ ${{ inputs.session-timestamp }} == '' ]]; then
@@ -108,5 +108,5 @@ runs:
         echo -e "Obtaining STS Caller Identity (First-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
-            sts get-caller-identity \
-            --debug ;
+            sts get-caller-identity ;
+            ## --debug ;
