@@ -1,0 +1,47 @@
+name: 'Hello World'
+description: 'Greet someone'
+inputs:
+  who-to-greet:  # id of input
+    description: 'Who to greet'
+    required: true
+    default: 'World'
+outputs:
+  random-number: 
+    description: "Random number"
+    value: ${{ steps.random-number-generator.outputs.random-id }}
+runs:
+  using: "composite"
+  steps: 
+    - run: echo Hello ${{ inputs.who-to-greet }}.
+      shell: bash
+    - id: random-number-generator
+      run: echo "::set-output name=random-id::$(echo $RANDOM)"
+      shell: bash
+    - run: |
+        echo -e "\nListing: env";
+        env|sort -n;
+        echo -e "\nListing: set";
+        set|sort -n;
+        echo -e "${CI}"; ##	Always set to true.
+        echo -e "${HOME}"; ##		The path to the GitHub home directory used to store user data. For example, /github/home.
+        echo -e "${GITHUB_WORKFLOW}";     ##		The name of the workflow.
+        echo -e "${GITHUB_RUN_ID}";       ##		A unique number for each run within a repository. This number does not change if you re-run the workflow run.
+        echo -e "${GITHUB_RUN_NUMBER}";   ##		A unique number for each run of a particular workflow in a repository. This number begins at 1 for the workflow's first run, and increments with each new run. This number does not change if you re-run the workflow run.
+        echo -e "${GITHUB_ACTION}";       ##		The unique identifier (id) of the action.
+        echo -e "${GITHUB_ACTIONS}";      ##		Always set to true when GitHub Actions is running the workflow. You can use this variable to differentiate when tests are being run locally or by GitHub Actions.
+        echo -e "${GITHUB_ACTOR}";        ##		The name of the person or app that initiated the workflow. For example, octocat.
+        echo -e "${GITHUB_REPOSITORY}";   ##		The owner and repository name. For example, octocat/Hello-World.
+        echo -e "${GITHUB_EVENT_NAME}";   ##		The name of the webhook event that triggered the workflow.
+        echo -e "${GITHUB_EVENT_PATH}";   ##		The path of the file with the complete webhook event payload. For example, /github/workflow/event.json.
+        echo -e "${GITHUB_WORKSPACE}";    ##		The GitHub workspace directory path. The workspace directory contains a subdirectory with a copy of your repository if your workflow uses the actions/checkout action. If you don't use the actions/checkout action, the directory will be empty. For example, /home/runner/work/my-repo-name/my-repo-name.
+        echo -e "${GITHUB_SHA}";          ##		The commit SHA that triggered the workflow. For example, ffac537e6cbbf934b08745a378932722df287a53.
+        echo -e "${GITHUB_REF}";          ##		The branch or tag ref that triggered the workflow. For example, refs/heads/feature-branch-1. If neither a branch or tag is available for the event type, the variable will not exist.
+        echo -e "${GITHUB_HEAD_REF}";     ##		Only set for forked repositories. The branch of the head repository.
+        echo -e "${GITHUB_BASE_REF}";     ##		Only set for forked repositories. The branch of the base repository.
+        echo -e "${GITHUB_SERVER_URL}";   ##		Returns the URL of the GitHub server. For example: https://github.com.
+        echo -e "${GITHUB_API_URL}";      ##		Returns the API URL. For example: https://api.github.com.
+        echo -e "${GITHUB_GRAPHQL_URL}";  ##		Returns the GraphQL API URL. For example: https://api.github.com/graphql.
+        echo -e "\nAction Plan: ${{ github.action_path }}";
+        ## ./goodbye.sh;
+
+      shell: bash

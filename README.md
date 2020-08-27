@@ -1,2 +1,2 @@
-# assumerole
-AWS IAM Assume Role As A Service (ARaaS)
+# AWS STS
+AWS IAM Role As A Service (RaaS)
