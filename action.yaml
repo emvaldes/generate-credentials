@@ -94,6 +94,9 @@ runs:
         done ;
         ## Displaying Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
+        echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
+        echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
+        echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
 ####----------------------------------------------------------------------------
     ## Environment Variables
     - name: Environment Variables
@@ -120,6 +123,9 @@ runs:
       id: update_credentials
       shell: bash
       run: |
+        echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
+        echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
+        echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
         declare -a credentials=(
             "aws_access_key_id~${AWS_ACCESS_KEY_ID}"
             "aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}"
