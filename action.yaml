@@ -104,7 +104,6 @@ runs:
         export AWS_SECRETS_ACCESS_KEY="${{ env.AWS_SECRETS_ACCESS_KEY }}" ;
         echo -e "Test-0: ${AWS_ACCESS_KEY_ID}";
         echo -e "Test-0: ${AWS_SECRETS_ACCESS_KEY}";
-        exit -1;
 #       continue-on-error: false
 #     - name: Check On Failures
 #       if: steps.generate_credentials.outputs.status == 'failure'
