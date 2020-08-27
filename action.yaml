@@ -82,4 +82,5 @@ runs:
           eval "echo '::set-env name=${session_items[$((counter++))]}::${xkey}'" ;
         done ;
         ## Displaying Shared-Credentials file:
-        echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
+        ## echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
+        echo '::set-output name=credentials-file::testing' ;
