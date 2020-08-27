@@ -102,6 +102,7 @@ runs:
       ## Inspect Credentials
       - name: Inspecting User Credentials
         id: inspect_credentials
+        shell: bash
         run: |
           echo ::add-mask::${{ inputs.devops-account-id }} ;
           echo -e "Obtaining STS Caller Identity (First-Time)" ;
