@@ -104,7 +104,7 @@ runs:
       id: inspect_credentials
       shell: bash
       run: |
-        echo ::add-mask::${{ inputs.devops-account-id }} ;
+        echo '::add-mask::${{ inputs.devops-account-id }}' ;
         echo -e "Obtaining STS Caller Identity (First-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
