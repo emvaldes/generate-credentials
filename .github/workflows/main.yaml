@@ -3,22 +3,21 @@ on: [push]
 jobs:
   credentials:
     runs-on: ubuntu-latest
-    name: Testing AWS STS Assume Role
     steps:
-    - uses: actions/checkout@v2
-      id: request_credentials
-      shell: bash
-      uses: ./
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-shared-credentials-file: ${{ secrets.AWS_SHARED_CREDENTIALS_FILE }}
-        aws-default-profile: ${{ secrets.AWS_DEFAULT_PROFILE }}
-        aws-default-region: ${{ secrets.AWS_DEFAULT_REGION }}
-        aws-default-account: ${{ secrets.AWS_DEFAULT_ACCOUNT }}
-        session-timestamp: ${{ secrets.SESSION_TIMESTAMP }}
-        devops-access-role: ${{ secrets.DEVOPS_ACCESS_ROLE }}
-        devops-account-id: ${{ secrets.DEVOPS_ACCOUNT_ID }}
-        devops-account-name: ${{ secrets.DEVOPS_ACCOUNT_NAME }}
-      run: |
-        echo 'testing'
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Testing AWS STS Assume Role
+        uses: emvaldes/ras@0.01
+        id: request_credentials
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-shared-credentials-file: ${{ secrets.AWS_SHARED_CREDENTIALS_FILE }}
+          aws-default-profile: ${{ secrets.AWS_DEFAULT_PROFILE }}
+          aws-default-region: ${{ secrets.AWS_DEFAULT_REGION }}
+          aws-default-account: ${{ secrets.AWS_DEFAULT_ACCOUNT }}
+          session-timestamp: ${{ secrets.SESSION_TIMESTAMP }}
+          devops-access-role: ${{ secrets.DEVOPS_ACCESS_ROLE }}
+          devops-account-id: ${{ secrets.DEVOPS_ACCOUNT_ID }}
+          devops-account-name: ${{ secrets.DEVOPS_ACCOUNT_NAME }}
