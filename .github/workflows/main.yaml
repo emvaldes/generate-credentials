@@ -53,6 +53,7 @@ jobs:
         uses: ./
         id: request_credentials
         with:
+          verbose-mode: 'true'
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-shared-credentials-file: "${{ env.AWS_SHARED_CREDENTIALS_FILE }}"
