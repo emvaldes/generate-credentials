@@ -107,3 +107,17 @@ runs:
         echo -e "\nDisplaying: env\n"; env;
         echo -e "\nDisplaying: set\n"; set;
 ####----------------------------------------------------------------------------
+    ## Inspect Credentials
+    - name: Inspecting User Credentials
+      id: inspect_credentials
+      shell: bash
+      run: |
+        echo -e;
+        echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
+        echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
+        echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
+        echo "::add-mask::${DEVOPS_ACCOUNT_ID}" ;
+        echo -e "Obtaining STS Caller Identity (First-Time)" ;
+#        aws --profile ${AWS_DEFAULT_PROFILE} \
+#            --region ${AWS_DEFAULT_REGION} \
+#            sts get-caller-identity ;
