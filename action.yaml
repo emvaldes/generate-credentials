@@ -60,13 +60,14 @@ runs:
         export AWS_SHARED_CREDENTIALS_FILE="${{ inputs.aws-shared-credentials-file }}";
         mkdir -p ${AWS_SHARED_CREDENTIALS_FILE%\/*};
         declare -a credsfile=();
-        credsfile+=("[default]\n");
-        credsfile+=("aws_access_key_id = \n");
-        credsfile+=("aws_secret_access_key = \n");
-        credsfile+=("aws_session_token = \n");
-        credsfile+=("x_principal_arn = \n");
-        credsfile+=("x_security_token_expires = \n");
-        for xline in ${credsfile[@]}; do echo -e ${xline} >> ${AWS_SHARED_CREDENTIALS_FILE}; done;
+        credsfile+=("[default]");
+        credsfile+=("aws_access_key_id = ");
+        credsfile+=("aws_secret_access_key = ");
+        credsfile+=("aws_session_token = ");
+        credsfile+=("x_principal_arn = ");
+        credsfile+=("x_security_token_expires = ");
+        cat /dev/null > ${AWS_SHARED_CREDENTIALS_FILE};
+        for xline in ${credsfile[@]}; do echo -e "${xline}" >> ${AWS_SHARED_CREDENTIALS_FILE}; done;
         cat $AWS_SHARED_CREDENTIALS_FILE;
         if [[ ${{ inputs.session-timestamp }} == '' ]]; then
                 session_timestamp="DevOpsPipeline--$(date +"%Y%m%d%H%M%S")";
