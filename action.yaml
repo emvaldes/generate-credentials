@@ -143,3 +143,12 @@ runs:
           ## echo -e "Injecting Latest Credential:\n${credential%\~*} = ${credential#*\~} ..." ;
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
         done ;
+####----------------------------------------------------------------------------
+    ## Confirm Credentials
+    - name: Confirming User Credentials
+      id: confirm_credentials
+      run: |
+        echo -e "Obtaining Caller Identity (Second-Time)" ;
+        aws --profile ${{ inputs.aws-default-profile }} \
+            --region ${{ inputs.aws-default-region }} \
+            sts get-caller-identity ;
