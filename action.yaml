@@ -94,7 +94,7 @@ runs:
         done ;
         ## Displaying Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
-        echo -e;
+        echo -e "#### ========================================================";
         echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
         echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
         echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
@@ -112,12 +112,12 @@ runs:
       id: inspect_credentials
       shell: bash
       run: |
-        echo -e;
+        echo -e "#### ========================================================";
         echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
         echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
         echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
         echo "::add-mask::${DEVOPS_ACCOUNT_ID}" ;
-        echo -e "Obtaining STS Caller Identity (First-Time)" ;
+        echo -e "\nObtaining STS Caller Identity (First-Time)" ;
         aws --profile ${AWS_DEFAULT_PROFILE} \
             --region ${AWS_DEFAULT_REGION} \
             sts get-caller-identity ;
@@ -127,12 +127,16 @@ runs:
       id: update_credentials
       shell: bash
       run: |
+        echo -e "#### ========================================================";
+        echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
+        echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
+        echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
         declare -a credentials=(
-            aws_access_key_id~${AWS_ACCESS_KEY_ID}
-            aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}
-            aws_session_token~${AWS_SESSION_TOKEN}
-            x_principal_arn~arn:aws:iam::${{ inputs.aws-default-account }}:user/${{ inputs.devos-account-name }}
-            x_security_token_expires~${AWS_TOKEN_EXPIRES}
+            "aws_access_key_id~${AWS_ACCESS_KEY_ID}"
+            "aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}"
+            "aws_session_token~${AWS_SESSION_TOKEN}"
+            "x_principal_arn~arn:aws:iam::${{ inputs.aws-default-account }}:user/${{ inputs.devos-account-name }}"
+            "x_security_token_expires~${AWS_TOKEN_EXPIRES}"
           ) ;
         echo -e "Displaying Latest Credentials:\n${credentials[@]}\n" ;
 #        for credential in ${credentials[@]}; do
