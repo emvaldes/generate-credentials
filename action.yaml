@@ -101,10 +101,10 @@ runs:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
         ####----------------------------------------------------------------------------
         ## echo '::add-mask::${{ inputs.devops-account-id }}' ;
-        echo -e "\nObtaining STS Caller Identity (First-Time)" ;
-        aws --profile ${{ inputs.aws-default-profile }} \
-            --region ${{ inputs.aws-default-region }} \
-            sts get-caller-identity ;
+        ##echo -e "\nObtaining STS Caller Identity (First-Time)" ;
+        ##aws --profile ${{ inputs.aws-default-profile }} \
+        ##    --region ${{ inputs.aws-default-region }} \
+        ##    sts get-caller-identity ;
         ####----------------------------------------------------------------------------
         declare -a credentials=(
             "aws_access_key_id~${AWS_ACCESS_KEY_ID}"
