@@ -66,7 +66,7 @@ runs:
         credsfile=("x_security_token_expires = \n");
         export AWS_SHARED_CREDENTIALS_FILE="${{ inputs.aws-shared-credentials-file }}";
         mkdir -p ${AWS_SHARED_CREDENTIALS_FILE%\/*};
-        echo -e "${credsfile[*]}" > ${AWS_CREDENTIALS_FILE};
+        echo -e "${credsfile[*]}" > ${AWS_SHARED_CREDENTIALS_FILE};
         if [[ ${{ inputs.session-timestamp }} == '' ]]; then
                 session_timestamp="DevOpsPipeline--$(date +"%Y%m%d%H%M%S")";
           else  session_timestamp="${{ inputs.session-timestamp }}";
