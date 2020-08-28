@@ -98,13 +98,10 @@ runs:
                 --role-session-name "${session_timestamp}" \
                 --query 'Credentials.{aki:AccessKeyId,sak:SecretAccessKey,stk:SessionToken,sts:Expiration}' \
                 --output text
-             )) ;
-        if [[ ${{ inputs.verbose-mode }} == 'true' ]]; then
-          echo -e "Session Token:\n${session_token[@]}" ;
-        fi;
+          )) ;
         echo -e "Fetched STS Assumed Role Values:" ;
         declare -a session_items=(AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_TOKEN_EXPIRES) ;
-        echo -e "\nConstructed Session Items [array]:\n${session_items[@]}" ;
+        echo -e "\nConstructed Session Items [array]:\n${session_items[@]}\n" ;
         counter=0; for xkey in "${session_token[@]}"; do
           eval "export ${session_items[$((counter++))]}=${xkey}" ;
         done ;
