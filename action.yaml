@@ -98,7 +98,7 @@ runs:
 #        echo -e "\nDisplaying: env\n"; env;
 #        echo -e "\nDisplaying: set\n"; set;
 ####----------------------------------------------------------------------------
-        echo '::add-mask::${{ devops-account-id }}' ;
+        echo '::add-mask::${{ inputs.devops-account-id }}' ;
         echo -e "\nObtaining STS Caller Identity (First-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
