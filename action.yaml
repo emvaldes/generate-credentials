@@ -117,7 +117,7 @@ runs:
 #        echo -e "AWS Session Token: ${{ env.AWS_SESSION_TOKEN }}" ;
         echo '::add-mask::${{ inputs.devops-account-id }}' ;
         echo -e "\nObtaining STS Caller Identity (First-Time)" ;
-        aws --profile ${{ inputs.aws-default-profile }} \
+        echo aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
             sts get-caller-identity ;
             ## --debug ;
