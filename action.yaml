@@ -150,6 +150,6 @@ runs:
       shell: bash
       run: |
         echo -e "\nObtaining Caller Identity (Second-Time)" ;
-        aws --profile ${{ inputs.aws-default-profile }} \
-            --region ${{ inputs.aws-default-region }} \
+        aws --profile ${AWS_ACCESS_KEY_ID} \
+            --region ${AWS_SECRET_ACCESS_KEY} \
             sts get-caller-identity ;
