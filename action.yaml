@@ -94,10 +94,6 @@ runs:
         done ;
         ## Displaying Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
-        echo -e "#### ========================================================";
-        echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
-        echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
-        echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
 ####----------------------------------------------------------------------------
     ## Environment Variables
     - name: Environment Variables
@@ -112,10 +108,6 @@ runs:
       id: inspect_credentials
       shell: bash
       run: |
-        echo -e "#### ========================================================";
-        echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
-        echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
-        echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
         echo "::add-mask::${DEVOPS_ACCOUNT_ID}" ;
         echo -e "\nObtaining STS Caller Identity (First-Time)" ;
         aws --profile ${AWS_DEFAULT_PROFILE} \
@@ -127,10 +119,6 @@ runs:
       id: update_credentials
       shell: bash
       run: |
-        echo -e "#### ========================================================";
-        echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
-        echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
-        echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
         declare -a credentials=(
             "aws_access_key_id~${AWS_ACCESS_KEY_ID}"
             "aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}"
@@ -138,9 +126,9 @@ runs:
             "x_principal_arn~arn:aws:iam::${{ inputs.aws-default-account }}:user/${{ inputs.devops-account-name }}"
             "x_security_token_expires~${AWS_TOKEN_EXPIRES}"
           ) ;
-        echo -e "\nDisplaying Latest Credentials:\n${credentials[@]}\n" ;
+        ## echo -e "\nDisplaying Latest Credentials:\n${credentials[@]}\n" ;
         for credential in ${credentials[@]}; do
-          echo -e "Injecting Credential: -> ${credential%\~*} = ${credential#*\~}" ;
+          ## echo -e "Injecting Credential: -> ${credential%\~*} = ${credential#*\~}" ;
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
         done ;
 ####----------------------------------------------------------------------------
