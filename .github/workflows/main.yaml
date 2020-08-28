@@ -1,3 +1,4 @@
+name: GitHub Actions - AWS STS Assume Role
 on: [push]
 
 env:
@@ -48,7 +49,7 @@ jobs:
         run: |
           aws --version ;
 ####----------------------------------------------------------------------------
-      - name: Testing AWS STS Assume Role
+      - name: AWS STS Assume Role
         uses: ./
         id: request_credentials
         with:
