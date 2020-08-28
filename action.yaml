@@ -118,6 +118,6 @@ runs:
         echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
         echo "::add-mask::${DEVOPS_ACCOUNT_ID}" ;
         echo -e "Obtaining STS Caller Identity (First-Time)" ;
-#        aws --profile ${AWS_DEFAULT_PROFILE} \
-#            --region ${AWS_DEFAULT_REGION} \
-#            sts get-caller-identity ;
+        aws --profile ${AWS_DEFAULT_PROFILE} \
+            --region ${AWS_DEFAULT_REGION} \
+            sts get-caller-identity ;
