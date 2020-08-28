@@ -74,6 +74,11 @@ runs:
         ## echo -e "\nDisplay Default User-Credentails (file):" ;
         ## cat ${{ inputs.aws-shared-credentials-file }} ;
         echo -e "Initiating STS Assume Role request ..." ;
+        aws --profile ${{ inputs.aws-default-profile }} \
+            --region ${{ inputs.aws-default-region }} \
+            sts assume-role \
+            --role-arn arn:aws:iam::${{ inputs.aws-default-account }}:role/${{ inputs.devops-access-role }} \
+            --role-session-name "${session_timestamp}" ;
         declare -a session_token=($(
             aws --profile ${{ inputs.aws-default-profile }} \
                 --region ${{ inputs.aws-default-region }} \
