@@ -87,9 +87,6 @@ runs:
           ) ;
         echo -e "\nInjecting Default User-Credentials into AWS-Credentials file: ${AWS_SHARED_CREDENTIALS_FILE}\n";
         for credential in ${credentials[@]}; do
-          if [[ ${{ inputs.verbose-mode }} == 'true' ]]; then
-            echo -e "Injecting Default User-Credential: ${credential%\~*} = ${credential#*\~} ..." ;
-          fi;
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${AWS_SHARED_CREDENTIALS_FILE} ;
         done ;
         echo -e "Initiating STS Assume Role request ..." ;
@@ -109,9 +106,6 @@ runs:
         declare -a session_items=(AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_TOKEN_EXPIRES) ;
         echo -e "\nConstructed Session Items [array]:\n${session_items[@]}" ;
         counter=0; for xkey in "${session_token[@]}"; do
-          if [[ ${{ inputs.verbose-mode }} == 'true' ]]; then
-            echo -e "Exporting Session Variables: ${session_items[${counter}]} = ${xkey}" ;
-          fi;
           eval "export ${session_items[$((counter++))]}=${xkey}" ;
         done ;
         ## Exporting AWS Shared-Credentials file:
