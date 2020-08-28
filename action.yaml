@@ -47,9 +47,6 @@ outputs:
   credentials-file:
     description: "Displaying AWS Credentials file-path"
     value: ${{ steps.assume_credentials.outputs.credentials-file }}
-  x_security_token_expires:
-    description: "Displaying AWS Security Token expiration date/time"
-    value: ${{ steps.assume_credentials.outputs.x_security_token_expires }}
 ####----------------------------------------------------------------------------
 runs:
   using: "composite"
@@ -98,21 +95,10 @@ runs:
         counter=0; for xkey in "${session_token[@]}"; do
           echo -e "Exporting Session Variables: ${session_items[${counter}]} = ${xkey}" ;
           eval "export ${session_items[$((counter++))]}=${xkey}" ;
-          eval "echo '::set-output name=${session_items[$((counter++))]}::${xkey}'" ;
           ## eval "echo '::set-env name=${session_items[$((counter++))]}::${xkey}'" ;
         done ;
         ## Displaying Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
-        ####----------------------------------------------------------------------------
-        echo -e "===== ${AWS_TOKEN_EXPIRES} =====";
-        echo -e "===== ${{ steps.assume_credentials.outputs.x_security_token_expires }} =====";
-        ####----------------------------------------------------------------------------
-        ## echo '::add-mask::${{ inputs.devops-account-id }}' ;
-        echo -e "\nObtaining STS Caller Identity (First-Time)" ;
-        aws --profile ${{ inputs.aws-default-profile }} \
-            --region ${{ inputs.aws-default-region }} \
-            sts get-caller-identity ;
-        ####----------------------------------------------------------------------------
         declare -a credentials=(
             aws_access_key_id~${AWS_ACCESS_KEY_ID}
             aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}
@@ -125,9 +111,6 @@ runs:
           echo -e "Injecting Credential: -> ${credential%\~*} = ${credential#*\~}" ;
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
         done ;
-        ####----------------------------------------------------------------------------
-        echo -e;
-        cat ${{ inputs.aws-shared-credentials-file }};
         echo -e "\nObtaining Caller Identity (Second-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
