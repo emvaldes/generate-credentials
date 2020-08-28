@@ -67,7 +67,11 @@ runs:
         credsfile+=("x_principal_arn = ");
         credsfile+=("x_security_token_expires = ");
         cat /dev/null > ${AWS_SHARED_CREDENTIALS_FILE};
-        for xline in ${credsfile[@]}; do echo -e "${xline}" >> ${AWS_SHARED_CREDENTIALS_FILE}; done;
+        oIFS="${IFS}"; IFS=$'\n';
+        for xline in ${credsfile[@]}; do
+          echo -e "${xline}" >> ${AWS_SHARED_CREDENTIALS_FILE};
+        done;
+        IFS="${oIFS}";
         cat $AWS_SHARED_CREDENTIALS_FILE;
         if [[ ${{ inputs.session-timestamp }} == '' ]]; then
                 session_timestamp="DevOpsPipeline--$(date +"%Y%m%d%H%M%S")";
