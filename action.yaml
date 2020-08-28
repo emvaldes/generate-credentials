@@ -67,6 +67,7 @@ runs:
         export AWS_SHARED_CREDENTIALS_FILE="${{ inputs.aws-shared-credentials-file }}";
         mkdir -p ${AWS_SHARED_CREDENTIALS_FILE%\/*};
         echo -e "${credsfile[*]}" > ${AWS_SHARED_CREDENTIALS_FILE};
+        cat $AWS_SHARED_CREDENTIALS_FILE;
         if [[ ${{ inputs.session-timestamp }} == '' ]]; then
                 session_timestamp="DevOpsPipeline--$(date +"%Y%m%d%H%M%S")";
           else  session_timestamp="${{ inputs.session-timestamp }}";
@@ -76,10 +77,10 @@ runs:
             aws_secret_access_key~${{ inputs.aws-secret-access-key }}
           ) ;
         ## echo -e "\nDefault Credentials:\n${credentials[@]}" ;
-        echo -e "\nInjecting Default User-Credentials into AWS-Credentials file: ${{ inputs.aws-shared-credentials-file }}\n";
+        echo -e "\nInjecting Default User-Credentials into AWS-Credentials file: ${AWS_SHARED_CREDENTIALS_FILE}\n";
         for credential in ${credentials[@]}; do
           ## echo -e "Injecting Default User-Credential: ${credential%\~*} = ${credential#*\~} ..." ;
-          sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
+          sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${AWS_SHARED_CREDENTIALS_FILE} ;
         done ;
         echo -e "Initiating STS Assume Role request ..." ;
         declare -a session_token=($(
@@ -101,7 +102,7 @@ runs:
           ## eval "echo '::set-env name=${session_items[$((counter++))]}::${xkey}'" ;
         done ;
         ## Exporting AWS Shared-Credentials file:
-        echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
+        echo '::set-output name=credentials-file::${AWS_SHARED_CREDENTIALS_FILE}' ;
         declare -a credentials=(
             aws_access_key_id~${AWS_ACCESS_KEY_ID}
             aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}
@@ -112,7 +113,7 @@ runs:
         echo -e "\nDisplaying Latest Credentials:\n${credentials[@]}\n" ;
         for credential in ${credentials[@]}; do
           echo -e "Injecting Credential: -> ${credential%\~*} = ${credential#*\~}" ;
-          sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
+          sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${AWS_SHARED_CREDENTIALS_FILE} ;
         done ;
         echo -e "\nObtaining Caller Identity (Second-Time)" ;
         echo "::add-mask::${{ inputs.devops-account-id }}" ;
