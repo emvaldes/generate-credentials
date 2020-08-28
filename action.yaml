@@ -95,30 +95,15 @@ runs:
         ## Displaying Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
 ####----------------------------------------------------------------------------
-#    ## Environment Variables
-#    - name: Environment Variables
-#      id: environment_variables
-#      shell: bash
-#      run: |
 #        echo -e "\nDisplaying: env\n"; env;
 #        echo -e "\nDisplaying: set\n"; set;
 ####----------------------------------------------------------------------------
-    ## Inspect Credentials
-    - name: Inspecting User Credentials
-      id: inspect_credentials
-      shell: bash
-      run: |
         echo "::add-mask::${DEVOPS_ACCOUNT_ID}" ;
         echo -e "\nObtaining STS Caller Identity (First-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
             sts get-caller-identity ;
 ####----------------------------------------------------------------------------
-    ## Update DevOps Credentials
-    - name: Update DevOps Credentials
-      id: update_credentials
-      shell: bash
-      run: |
         declare -a credentials=(
             "aws_access_key_id~${AWS_ACCESS_KEY_ID}"
             "aws_secret_access_key~${AWS_SECRET_ACCESS_KEY}"
@@ -132,11 +117,6 @@ runs:
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
         done ;
 ####----------------------------------------------------------------------------
-    ## Confirm Credentials
-    - name: Confirming User Credentials
-      id: confirm_credentials
-      shell: bash
-      run: |
         echo -e;
         cat ${{ inputs.aws-shared-credentials-file }};
         echo -e "\nObtaining Caller Identity (Second-Time)" ;
