@@ -6,7 +6,34 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-
+####----------------------------------------------------------------------------
+      ## Updating AWS CLI (latest)
+      - name: Updating AWS CLI (lastest)
+        id: update_awscli
+        env:
+          awscli_download: awscli.amazonaws.com
+          awscli_platform: linux-x86_64
+          awscli_package: awscli-exe-linux-x86_64.zip
+        run: |
+          aws --version >/dev/null 2>&1 && {
+              echo -e >&2 "AWS CLI is Installed ... Ok! ";
+              aws --version ;
+            } ;
+          echo -e "Upgrading AWS-CLI to version 2.0.40" ;
+          ## https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
+          cd /tmp ;
+          wget --quiet "https://${{ env.awscli_download }}/${{ env.awscli_package }}" \
+               --directory-prefix=/tmp/ --output-document=awscliv2.zip ;
+          unzip awscliv2.zip 1>/dev/null ;
+          ls -l /usr/local/bin/aws ;
+          sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update ;
+####----------------------------------------------------------------------------
+      ## Inspecting AWS CLI Version
+      - name: Inpsecting AWS CLI Version
+        id: inspect_awscli
+        run: |
+          aws --version ;
+####----------------------------------------------------------------------------
       - name: Testing AWS STS Assume Role
         uses: ./
         id: request_credentials
