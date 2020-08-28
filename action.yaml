@@ -37,7 +37,7 @@ inputs:
   devops-account-id:
     description: 'DevOps Account ID'
     required: true
-    default: 'DevOps--Custom-Access.Role'
+    default: ''
   devops-account-name:
     description: 'DevOps Account Name'
     required: true
@@ -117,7 +117,7 @@ runs:
 #        echo -e "AWS Session Token: ${{ env.AWS_SESSION_TOKEN }}" ;
         echo '::add-mask::${{ inputs.devops-account-id }}' ;
         echo -e "\nObtaining STS Caller Identity (First-Time)" ;
-        echo aws --profile ${{ inputs.aws-default-profile }} \
+        aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
             sts get-caller-identity ;
             ## --debug ;
