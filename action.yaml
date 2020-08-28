@@ -95,13 +95,13 @@ runs:
         ## Displaying Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
 ####----------------------------------------------------------------------------
-    ## Environment Variables
-    - name: Environment Variables
-      id: environment_variables
-      shell: bash
-      run: |
-        echo -e "\nDisplaying: env\n"; env;
-        echo -e "\nDisplaying: set\n"; set;
+#    ## Environment Variables
+#    - name: Environment Variables
+#      id: environment_variables
+#      shell: bash
+#      run: |
+#        echo -e "\nDisplaying: env\n"; env;
+#        echo -e "\nDisplaying: set\n"; set;
 ####----------------------------------------------------------------------------
     ## Inspect Credentials
     - name: Inspecting User Credentials
