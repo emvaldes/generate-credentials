@@ -57,6 +57,8 @@ runs:
       id: assume_credentials
       shell: bash
       run: |
+        export AWS_SHARED_CREDENTIALS_FILE="${{ inputs.aws-shared-credentials-file }}";
+        mkdir -p ${AWS_SHARED_CREDENTIALS_FILE%\/*};
         declare -a credsfile=();
         credsfile+=("[default]\n");
         credsfile+=("aws_access_key_id = \n");
@@ -64,9 +66,7 @@ runs:
         credsfile+=("aws_session_token = \n");
         credsfile+=("x_principal_arn = \n");
         credsfile+=("x_security_token_expires = \n");
-        export AWS_SHARED_CREDENTIALS_FILE="${{ inputs.aws-shared-credentials-file }}";
-        mkdir -p ${AWS_SHARED_CREDENTIALS_FILE%\/*};
-        echo -e "${credsfile[@]}" > ${AWS_SHARED_CREDENTIALS_FILE};
+        for xline in ${credsfile[@]}; do echo -e ${xline} >> ${AWS_SHARED_CREDENTIALS_FILE};
         cat $AWS_SHARED_CREDENTIALS_FILE;
         if [[ ${{ inputs.session-timestamp }} == '' ]]; then
                 session_timestamp="DevOpsPipeline--$(date +"%Y%m%d%H%M%S")";
