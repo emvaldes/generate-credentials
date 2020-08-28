@@ -94,6 +94,7 @@ runs:
         done ;
         ## Displaying Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
+        echo -e;
         echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
         echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
         echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
@@ -111,9 +112,10 @@ runs:
       id: inspect_credentials
       shell: bash
       run: |
-        echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
-        echo -e "AWS Secret Access Key: ${AWS_SECRET_ACCESS_KEY}" ;
-        echo -e "AWS Session Token: ${AWS_SESSION_TOKEN}" ;
+        echo -e;
+        echo -e "AWS Access Key-ID: ${{ env.AWS_ACCESS_KEY_ID }}" ;
+        echo -e "AWS Secret Access Key: ${{ env.AWS_SECRET_ACCESS_KEY }}" ;
+        echo -e "AWS Session Token: ${{ env.AWS_SESSION_TOKEN }}" ;
         echo '::add-mask::${{ inputs.devops-account-id }}' ;
         echo -e "\nObtaining STS Caller Identity (First-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
