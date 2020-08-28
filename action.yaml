@@ -66,7 +66,7 @@ runs:
         credsfile+=("aws_session_token = \n");
         credsfile+=("x_principal_arn = \n");
         credsfile+=("x_security_token_expires = \n");
-        for xline in ${credsfile[@]}; do echo -e ${xline} >> ${AWS_SHARED_CREDENTIALS_FILE};
+        for xline in ${credsfile[@]}; do echo -e ${xline} >> ${AWS_SHARED_CREDENTIALS_FILE}; done;
         cat $AWS_SHARED_CREDENTIALS_FILE;
         if [[ ${{ inputs.session-timestamp }} == '' ]]; then
                 session_timestamp="DevOpsPipeline--$(date +"%Y%m%d%H%M%S")";
