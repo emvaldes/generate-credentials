@@ -105,6 +105,7 @@ runs:
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
         done ;
         echo -e "\nObtaining Caller Identity (Second-Time)" ;
+        echo "::add-mask::${{ inputs.devops-account-id }}" ;
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
             sts get-caller-identity ;
