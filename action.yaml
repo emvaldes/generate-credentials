@@ -95,10 +95,7 @@ runs:
         ## Displaying Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
 ####----------------------------------------------------------------------------
-#        echo -e "\nDisplaying: env\n"; env;
-#        echo -e "\nDisplaying: set\n"; set;
-####----------------------------------------------------------------------------
-        echo '::add-mask::${{ inputs.devops-account-id }}' ;
+        ## echo '::add-mask::${{ inputs.devops-account-id }}' ;
         echo -e "\nObtaining STS Caller Identity (First-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
