@@ -110,8 +110,8 @@ runs:
       run: |
         echo "::add-mask::${DEVOPS_ACCOUNT_ID}" ;
         echo -e "\nObtaining STS Caller Identity (First-Time)" ;
-        aws --profile ${AWS_DEFAULT_PROFILE} \
-            --region ${AWS_DEFAULT_REGION} \
+        aws --profile ${{ inputs.aws-default-profile }} \
+            --region ${{ inputs.aws-default-region }} \
             sts get-caller-identity ;
 ####----------------------------------------------------------------------------
     ## Update DevOps Credentials
@@ -137,6 +137,7 @@ runs:
       id: confirm_credentials
       shell: bash
       run: |
+        echo -e;
         cat ${{ inputs.aws-shared-credentials-file }};
         echo -e "\nObtaining Caller Identity (Second-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
