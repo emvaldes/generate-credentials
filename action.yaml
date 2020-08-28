@@ -71,14 +71,7 @@ runs:
           ## echo -e "Injecting Default User-Credential: ${credential%\~*} = ${credential#*\~} ..." ;
           sed -i -e "s|^\(${credential%\~*}\)\( =\)\(.*\)$|\1\2 ${credential#*\~}|g" ${{ inputs.aws-shared-credentials-file }} ;
         done ;
-        ## echo -e "\nDisplay Default User-Credentails (file):" ;
-        ## cat ${{ inputs.aws-shared-credentials-file }} ;
         echo -e "Initiating STS Assume Role request ..." ;
-        aws --profile ${{ inputs.aws-default-profile }} \
-            --region ${{ inputs.aws-default-region }} \
-            sts assume-role \
-            --role-arn arn:aws:iam::${{ inputs.aws-default-account }}:role/${{ inputs.devops-access-role }} \
-            --role-session-name "${session_timestamp}" ;
         declare -a session_token=($(
             aws --profile ${{ inputs.aws-default-profile }} \
                 --region ${{ inputs.aws-default-region }} \
@@ -88,16 +81,16 @@ runs:
                 --query 'Credentials.{aki:AccessKeyId,sak:SecretAccessKey,stk:SessionToken,sts:Expiration}' \
                 --output text
              )) ;
-        echo -e "Fetched STS Assumed Role Values:" ;
         ## echo -e "Session Token:\n${session_token[@]}" ;
+        echo -e "Fetched STS Assumed Role Values:" ;
         declare -a session_items=(AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_TOKEN_EXPIRES) ;
         echo -e "\nConstructed Session Items [array]:\n${session_items[@]}\n" ;
         counter=0; for xkey in "${session_token[@]}"; do
-          echo -e "Exporting Session Variables: ${session_items[${counter}]} = ${xkey}" ;
+          ## echo -e "Exporting Session Variables: ${session_items[${counter}]} = ${xkey}" ;
           eval "export ${session_items[$((counter++))]}=${xkey}" ;
           ## eval "echo '::set-env name=${session_items[$((counter++))]}::${xkey}'" ;
         done ;
-        ## Displaying Shared-Credentials file:
+        ## Exporting AWS Shared-Credentials file:
         echo '::set-output name=credentials-file::${{ inputs.aws-shared-credentials-file }}' ;
         declare -a credentials=(
             aws_access_key_id~${AWS_ACCESS_KEY_ID}
