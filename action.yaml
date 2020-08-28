@@ -147,8 +147,9 @@ runs:
     ## Confirm Credentials
     - name: Confirming User Credentials
       id: confirm_credentials
+      shell: bash
       run: |
-        echo -e "Obtaining Caller Identity (Second-Time)" ;
+        echo -e "\nObtaining Caller Identity (Second-Time)" ;
         aws --profile ${{ inputs.aws-default-profile }} \
             --region ${{ inputs.aws-default-region }} \
             sts get-caller-identity ;
