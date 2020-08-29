@@ -1,7 +1,7 @@
 # AWS STS - Generate Credentials
 GitHub Actions - AWS STS Generate Credentials - Role As A Service (RaaS)
 
-![GitHub Actions - AWS STS Assume Role](https://github.com/emvaldes/raas/workflows/GitHub%20Actions%20-%20AWS%20STS%20Assume%20Role/badge.svg)
+![GitHub Actions - AWS STS Generate Credentials](https://github.com/emvaldes/generate-credentials/workflows/GitHub%20Actions%20-%20AWS%20STS%20Generate%20Credentials/badge.svg)
 
 **<span style="color:red">1</span>** -) Create a Public|Private GitHub Repository for your project
 
@@ -19,7 +19,7 @@ DEVOPS_ACCOUNT_ID:      It's intended to mask the AWS IAM User-ID when it gets l
 DEVOPS_ACCOUNT_NAME:    A placeholder for the Deployment Service Account's name (terraform).
 ```
 **<span style="color:red">4</span>** -) Create a GitHub Action - Pipeline to deploy your project: .github/workflows/main.yaml <br>
-**Note**: This is just a prototype of how to use this GitHub Action (uses: emvaldes/raas@v1.0)
+**Note**: This is just a prototype of how to use this GitHub Action (uses: emvaldes/generate-credentials@v1.0)
 
 [Pipeline Deployment](https://github.com/emvaldes/generate-credentials/blob/master/.github/workflows/main.yaml)
 
@@ -27,9 +27,21 @@ DEVOPS_ACCOUNT_NAME:    A placeholder for the Deployment Service Account's name 
 name: GitHub Actions - AWS STS Generate Credentials
 ## on: [push]
 on:
+####----------------------------------------------------------------------------
+  workflow_dispatch:
+    name: 'Manual Deployment'
+    description: 'Triggering Manual Deployment'
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Generate Credentials'
+####----------------------------------------------------------------------------
   push:
     branches: [ master ]
-    paths: 
+    paths:
       - action.yaml
 ####----------------------------------------------------------------------------
 env:
@@ -54,11 +66,11 @@ jobs:
 ####----------------------------------------------------------------------------
       ## Updating AWS CLI (latest)
       - name: Updating AWS CLI (lastest)
-        id: update_awscli
+        id: update-awscli
         run: |
           aws --version >/dev/null 2>&1 && {
               echo -e >&2 "AWS CLI is Installed ... Ok! ";
-              which terraform ;
+              which aws ;
               aws --version ;
             } ;
           echo -e "Upgrading AWS-CLI to version 2.0.40" ;
@@ -70,18 +82,28 @@ jobs:
           ls -l /usr/local/bin/aws ;
           sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update ;
           aws --version ;
+        continue-on-error: false
+      - name: Check On Failures
+        if: steps.update-awscli.outputs.status == 'failure'
+        run: |
+          echo -e "Warning: Installation Failed [Status]: ${{ steps.update-awscli.outputs.status }}" ;
 ####----------------------------------------------------------------------------
       - name: AWS STS Assume Role
         uses: ./
         id: request_credentials
         with:
           session-timestamp: 'DevOpsPipeline--20200827193000'
-          aws-default-account: ${{ env.AWS_DEFAULT_ACCOUNT }}
-          aws-default-region: ${{ env.AWS_DEFAULT_REGION }}
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          devops-access-role: ${{ env.DEVOPS_ACCESS_ROLE }}
-          devops-account-name: ${{ env.DEVOPS_ACCOUNT_NAME }}
+          aws-default-account: ${AWS_DEFAULT_ACCOUNT}
+          aws-default-region: ${AWS_DEFAULT_REGION}
+          aws-access-key-id: ${AWS_ACCESS_KEY_ID}
+          aws-secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+          devops-access-role: ${DEVOPS_ACCESS_ROLE}
+          devops-account-name: ${DEVOPS_ACCOUNT_NAME}
+        continue-on-error: false
+      - name: Check On Failures
+        if: steps.request_credentials.outputs.status == 'failure'
+        run: |
+          echo -e "Warning: Request Credentials Failed [Status]: ${{ steps.request_credentials.outputs.status }}" ;
 ####----------------------------------------------------------------------------
       ## Display Environment
       - name: Display Environment
@@ -100,9 +122,14 @@ jobs:
           --region ${AWS_DEFAULT_REGION} \
           iam list-users \
           --query 'Users[?UserName==`'${DEVOPS_ACCOUNT_NAME}'`]' ;
+        continue-on-error: false
+      - name: Check On Failures
+        if: steps.display_listusers.outputs.status == 'failure'
+        run: |
+          echo -e "Warning: Credentials Validation Failed [Status]: ${{ steps.display_listusers.outputs.status }}" ;
 ```
 
-**<span style="color:red">4</span>** -) The output will be like this: [Pipeline Execution](https://github.com/emvaldes/generate-credentials/runs/1045744474?check_suite_focus=true)
+**<span style="color:red">4</span>** -) The output will be like this: [Pipeline Execution](https://github.com/emvaldes/generate-credentials/actions?query=workflow%3A%22GitHub+Actions+-+AWS+STS+Generate+Credentials%22)
 
 ```console
 Injecting Default User-Credentials into AWS-Credentials file: /home/runner/work/generate-credentials/generate-credentials/.aws/credentials
@@ -135,7 +162,7 @@ Obtaining Caller Identity (Assumed-Role):
     "Arn": "arn:aws:sts::***:assumed-role/***/DevOpsPipeline--20200101000000"
 }
 
-Completed! 
+Completed!
 ```
 
 Happy Coding & Share your work!

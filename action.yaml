@@ -46,7 +46,7 @@ inputs:
 outputs:
   credentials-file:
     description: "Exporting AWS Credentials file-path"
-    value: ${{ steps.assume_credentials.outputs.credentials-file }}
+    value: ${{ steps.assume-credentials.outputs.credentials-file }}
 ####----------------------------------------------------------------------------
 runs:
   using: "composite"
@@ -54,7 +54,7 @@ runs:
     ####----------------------------------------------------------------------------
     ## AWS STS Assume Role
     - name: AWS STS Assume Role
-      id: assume_credentials
+      id: assume-credentials
       shell: bash
       run: |
         ####----------------------------------------------------------------------------

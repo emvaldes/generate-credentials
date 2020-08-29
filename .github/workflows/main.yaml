@@ -1,23 +1,32 @@
 name: GitHub Actions - AWS STS Generate Credentials
 ## on: [push]
 on:
+####----------------------------------------------------------------------------
+  workflow_dispatch:
+    name: 'Manual Deployment'
+    description: 'Triggering Manual Deployment'
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Generate Credentials'
+####----------------------------------------------------------------------------
   push:
     branches: [ master ]
     paths: 
       - action.yaml
 ####----------------------------------------------------------------------------
 env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_DEFAULT_ACCOUNT: ${{ secrets.AWS_DEFAULT_ACCOUNT }}
+  AWS_DEFAULT_REGION: 'us-east-1'
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  DEVOPS_ACCESS_ROLE: 'DevOps--Custom-Access.Role'
+  DEVOPS_ACCOUNT_NAME: deployment
   awscli_download: 'awscli.amazonaws.com'
   awscli_package: "awscli-exe-linux-x86_64.zip"
-  ## AWS Enviroment variables
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  ## AWS Default variables
-  AWS_DEFAULT_ACCOUNT: ${{ secrets.AWS_DEFAULT_ACCOUNT }}
-  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-  ## DevOps environment variables
-  DEVOPS_ACCOUNT_NAME: ${{ secrets.DEVOPS_ACCOUNT_NAME }}
-  DEVOPS_ACCESS_ROLE: ${{ secrets.DEVOPS_ACCESS_ROLE }}
 ####----------------------------------------------------------------------------
 jobs:
   generate-credentials:
@@ -26,48 +35,52 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
 ####----------------------------------------------------------------------------
-      ## Updating AWS CLI (latest)
-      - name: Updating AWS CLI (lastest)
-        id: update_awscli
-        run: |
-          aws --version >/dev/null 2>&1 && {
-              echo -e >&2 "AWS CLI is Installed ... Ok! ";
-              which terraform ;
-              aws --version ;
-            } ;
-          echo -e "Upgrading AWS-CLI to version 2.0.40" ;
-          ## https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
-          cd /tmp ;
-          wget --quiet "https://${awscli_download}/${awscli_package}" \
-               --directory-prefix=/tmp/ --output-document=awscliv2.zip ;
-          unzip awscliv2.zip 1>/dev/null ;
-          ls -l /usr/local/bin/aws ;
-          sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update ;
-          aws --version ;
+      ## System Requirements
+      - name: System Requirements
+        uses: emvaldes/system-requirements@master
+        id: system-requirements
+        with:
+          install-awscli-tool: true
+          install-custom-tools: 'netcat'
+          install-default-tools: true
+          install-terraform-cli: false
+          update-operating-system: true
+          update-python-version: true
         continue-on-error: false
       - name: Check On Failures
-        if: steps.update_awscli.outputs.status == 'failure'
-        run: echo "${{ steps.update_awscli.outputs.status }}" ;
+        if: steps.system-requirements.outputs.status == 'failure'
+        run: |
+          echo -e "Warning: System Requirements Failed [Status]: ${{ steps.system-requirements.outputs.status }}" ;
+####----------------------------------------------------------------------------
+      ## Installed Packages
+      - name: Installed Packages
+        id: installed-packages
+        shell: bash
+        run: |
+          jq --version;
+          tree --version;
+          terraform --version;
 ####----------------------------------------------------------------------------
       - name: AWS STS Assume Role
         uses: ./
         id: request_credentials
         with:
+          aws-access-key-id: ${AWS_ACCESS_KEY_ID}
+          aws-default-account: ${AWS_DEFAULT_ACCOUNT}
+          aws-default-region: ${AWS_DEFAULT_REGION}
+          aws-secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+          devops-access-role: ${DEVOPS_ACCESS_ROLE}
+          devops-account-name: ${DEVOPS_ACCOUNT_NAME}
           session-timestamp: 'DevOpsPipeline--20200827193000'
-          aws-default-account: ${{ env.AWS_DEFAULT_ACCOUNT }}
-          aws-default-region: ${{ env.AWS_DEFAULT_REGION }}
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          devops-access-role: ${{ env.DEVOPS_ACCESS_ROLE }}
-          devops-account-name: ${{ env.DEVOPS_ACCOUNT_NAME }}
         continue-on-error: false
       - name: Check On Failures
         if: steps.request_credentials.outputs.status == 'failure'
-        run: echo "${{ steps.request_credentials.outputs.status }}" ;
+        run: |
+          echo -e "Warning: Request Credentials Failed [Status]: ${{ steps.request_credentials.outputs.status }}" ;
 ####----------------------------------------------------------------------------
       ## Display Environment
       - name: Display Environment
-        id: display_environment
+        id: display-environment
         run: |
           echo -e "Displaying Enviroment Settings ..." ;
           echo -e "AWS Access Key-ID: ${AWS_ACCESS_KEY_ID}" ;
@@ -76,13 +89,14 @@ jobs:
 ####----------------------------------------------------------------------------
       ## Display IAM List-Users
       - name: Display IAM List-Users
-        id: display_listusers
+        id: display-listusers
         run: |
           aws --profile default \
-          --region ${AWS_DEFAULT_REGION} \
+          --region us-east-1 \
           iam list-users \
-          --query 'Users[?UserName==`'${DEVOPS_ACCOUNT_NAME}'`]' ;
+          --query 'Users[?UserName==`deployment`]' ;
         continue-on-error: false
       - name: Check On Failures
-        if: steps.display_listusers.outputs.status == 'failure'
-        run: echo "${{ steps.display_listusers.outputs.status }}" ;
+        if: steps.display-listusers.outputs.status == 'failure'
+        run: |
+          echo -e "Warning: Credentials Validation Failed [Status]: ${{ steps.display-listusers.outputs.status }}" ;
