@@ -2,95 +2,124 @@ name: Generate Credentials
 description: 'Generate Credentials'
 
 ####----------------------------------------------------------------------------
+
 inputs:
+
   aws-config-file:
     description: 'AWS Config File'
     required: false
     default: '.aws/config'
+
   aws-shared-credentials-file:
     description: 'AWS Shared Credentials File'
     required: false
     default: '.aws/credentials'
+
   aws-access-key-id:
     description: 'AWS Access Key-ID'
     required: true
     default: ''
+
   aws-secret-access-key:
     description: 'AWS Secret Access Key'
     required: true
     default: ''
+
   aws-default-profile:
     description: 'AWS Default Profile'
     required: false
     default: 'default'
+
   aws-default-region:
     description: 'AWS Default Region'
     required: false
     default: 'us-east-1'
+
   aws-default-account:
     description: 'AWS Default Account Number'
     required: true
     default: ''
+
   session-timestamp:
     description: 'Session Time-Stamp'
     required: false
     default: ''
+
   devops-access-role:
     description: 'DevOps Access Role'
     required: true
     default: 'DevOps--Custom-Access.Role'
+
   devops-account-id:
     description: 'DevOps Account ID'
     required: false
     default: ''
+
   devops-account-name:
     description: 'DevOps Account Name'
     required: true
     default: 'devops'
+
   temporary-credentials:
     description: 'AWS Temporary Credentials'
     required: false
     default: false
+
   keypair-secret:
     description: 'Private Key-Pair Secret'
     required: true
     default: false
+
 ####----------------------------------------------------------------------------
+
 outputs:
+
   aws-config-file:
     description: "Exporting AWS Config file-path"
     value: ${{ steps.generate-credentials.outputs.aws-config-file }}
+
   aws-shared-credentials-file:
     description: "Exporting AWS Credentials file-path"
     value: ${{ steps.generate-credentials.outputs.aws-shared-credentials-file }}
+
   aws-access-key-id:
     description: "Exporting AWS Access Key-ID"
     value: ${{ steps.generate-credentials.outputs.aws-access-key-id }}
+
   aws-secret-access-key:
     description: "Exporting AWS Secret Access Key"
     value: ${{ steps.generate-credentials.outputs.aws-secret-access-key }}
+
   aws-session-token:
     description: "Exporting AWS Session Token"
     value: ${{ steps.generate-credentials.outputs.aws-session-token }}
+
   aws-principal-arn:
     description: "Exporting AWS Principal ARN"
     value: ${{ steps.generate-credentials.outputs.aws-principal-arn }}
+
   aws-token-expires:
     description: "Exporting AWS Token Expires"
     value: ${{ steps.generate-credentials.outputs.aws-token-expires }}
+
   aws-default-account:
     description: "Exporting AWS Default Account"
     value: ${{ steps.generate-credentials.outputs.aws-default-account }}
+
 ####----------------------------------------------------------------------------
+
 runs:
   using: "composite"
   steps:
+
     ####------------------------------------------------------------------------
     ## Generate Credentials
+
     - name: Generate Credentials
       id: generate-credentials
       shell: bash
       run: |
+
         ####--------------------------------------------------------------------
         ## Note: Disabling masking in favor of account's visibility.
         ## echo '::add-mask::${{ inputs.devops-account-id }}' ;
@@ -186,7 +215,8 @@ runs:
                 echo -e "Obtaining Caller Identity (Default-Role):" ;
                 aws --profile ${target_profile} \
                     --region ${target_region} \
-                    sts get-caller-identity ;
+                    sts get-caller-identity \
+                | sed -e 's|\("UserId": "AIDA\)\(.*\)\("\)|\1***\3|' ;
                 ####------------------------------------------------------------
                 ## Exporting AWS Shared-Credentials file:
                 declare -a credential_properties=(
@@ -215,11 +245,14 @@ runs:
         echo -e "Obtaining Caller Identity (Assumed-Role):" ;
         aws --profile ${target_profile} \
             --region ${target_region} \
-            sts get-caller-identity ;
+            sts get-caller-identity \
+        | sed -e 's|\("UserId": "\)\(.*\)\:\(.*\)|\1***:\3|' ;
         ####--------------------------------------------------------------------
         ## echo -e "Exporting 'AWS_CONFIG_FILE' [ ${aws_folder}/config ]" ;
-        eval "echo \"::set-output name=AWS_CONFIG_FILE::${aws_folder}/config\"" ;
+
+        eval "echo \"AWS_CONFIG_FILE=${aws_folder}/config\"" ;
         echo "AWS_CONFIG_FILE=${aws_folder}/config" >> ${GITHUB_ENV} ;
+        echo -e ;
         ####--------------------------------------------------------------------
         declare credential_elements=(
             aws-shared-credentials-file~AWS_SHARED_CREDENTIALS_FILE~${AWS_SHARED_CREDENTIALS_FILE}
@@ -237,8 +270,16 @@ runs:
             setoutput="${BASH_REMATCH[1]}";
             environment="${BASH_REMATCH[2]}";
             credential="${BASH_REMATCH[3]}";
-            ## echo -e "Exporting '${environment}' [ ${credential} ]" ;
-            eval "echo \"::set-output name=${environment}::${credential}\"" ;
+            declare -a sanitize=(
+                AWS_SESSION_TOKEN
+                AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY
+              ) ;
+            for xitem in ${sanitize[@]}; do
+              [[ ${environment} == ${xitem} ]] && credential='***' ;
+            done ;
+            echo -e "Exporting '${environment}' [ ${credential} ]" ;
+            ## eval "echo \"${environment}=${credential}\"" ;
             echo "${environment}=${credential}" >> ${GITHUB_ENV} ;
           fi ;
         done ;
