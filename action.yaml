@@ -65,6 +65,16 @@ inputs:
     required: false
     default: false
 
+  sanitize-creds-output:
+    description: 'Sanitize Content Output'
+    required: false
+    default: false
+
+  private-keypair-file:
+    description: 'KeyPair Private Key'
+    required: false
+    default: 'devops.pem'
+
   keypair-secret:
     description: 'Private Key-Pair Secret'
     required: true
@@ -236,10 +246,10 @@ runs:
                 echo -en "${{ inputs.temporary-credentials }}" | base64 --decode > ${AWS_SHARED_CREDENTIALS_FILE} ;
                 ## echo -e ; cat ${AWS_SHARED_CREDENTIALS_FILE} ;
                 ####------------------------------------------------------------
-                ## Decoding Private Key-Pair Secret into ~/.ssh/id_rsa file.
+                ## Decoding Private Key-Pair Secret into ~/.ssh/${{ inputs.private-keypair-file }} file.
                 mkdir -p ${{ github.workspace }}/.ssh ;
-                echo -en "${PRIVATE_KEYPAIR_SECRET}" | base64 --decode > ${{ github.workspace }}/.ssh/id_rsa ;
-                ## echo -e ; cat ${{ github.workspace }}/.ssh/id_rsa ;
+                echo -en "${PRIVATE_KEYPAIR_SECRET}" | base64 --decode > ${{ github.workspace }}/.ssh/${{ inputs.private-keypair-file }} ;
+                ## echo -e ; cat ${{ github.workspace }}/.ssh/${{ inputs.private-keypair-file }} ;
         fi ;
         ####--------------------------------------------------------------------
         echo -e "Obtaining Caller Identity (Assumed-Role):" ;
@@ -254,35 +264,37 @@ runs:
         echo "AWS_CONFIG_FILE=${aws_folder}/config" >> ${GITHUB_ENV} ;
         echo -e ;
         ####--------------------------------------------------------------------
-        declare credential_elements=(
-            aws-shared-credentials-file~AWS_SHARED_CREDENTIALS_FILE~${AWS_SHARED_CREDENTIALS_FILE}
-            aws-default-profile~AWS_DEFAULT_PROFILE~default
-            aws-access-key-id~AWS_ACCESS_KEY_ID~${AWS_ACCESS_KEY_ID}
-            aws-secret-access-key~AWS_SECRET_ACCESS_KEY~${AWS_SECRET_ACCESS_KEY}
-            aws-session-token~AWS_SESSION_TOKEN~${AWS_SESSION_TOKEN}
-            aws-token-expires~AWS_TOKEN_EXPIRES~${AWS_TOKEN_EXPIRES}
-            aws-principal-arn~AWS_PRINCIPAL_ARN~${AWS_PRINCIPAL_ARN}
-            aws-default-account~AWS_DEFAULT_ACCOUNT~${AWS_DEFAULT_ACCOUNT}
-          );
-        regex="^(.*)~(.*)~(.*)$";
-        for element in ${credential_elements[@]}; do
-          if [[ ${element} =~ ${regex} ]]; then
-            setoutput="${BASH_REMATCH[1]}";
-            environment="${BASH_REMATCH[2]}";
-            credential="${BASH_REMATCH[3]}";
-            declare -a sanitize=(
-                AWS_SESSION_TOKEN
-                AWS_ACCESS_KEY_ID
-                AWS_SECRET_ACCESS_KEY
-              ) ;
-            for xitem in ${sanitize[@]}; do
-              [[ ${environment} == ${xitem} ]] && credential='***' ;
-            done ;
-            echo -e "Exporting '${environment}' [ ${credential} ]" ;
-            ## eval "echo \"${environment}=${credential}\"" ;
-            echo "${environment}=${credential}" >> ${GITHUB_ENV} ;
-          fi ;
-        done ;
+        if [[ ${{ inputs.sanitize-creds-output }} == true ]]; then
+          declare credential_elements=(
+              aws-shared-credentials-file~AWS_SHARED_CREDENTIALS_FILE~${AWS_SHARED_CREDENTIALS_FILE}
+              aws-default-profile~AWS_DEFAULT_PROFILE~default
+              aws-access-key-id~AWS_ACCESS_KEY_ID~${AWS_ACCESS_KEY_ID}
+              aws-secret-access-key~AWS_SECRET_ACCESS_KEY~${AWS_SECRET_ACCESS_KEY}
+              aws-session-token~AWS_SESSION_TOKEN~${AWS_SESSION_TOKEN}
+              aws-token-expires~AWS_TOKEN_EXPIRES~${AWS_TOKEN_EXPIRES}
+              aws-principal-arn~AWS_PRINCIPAL_ARN~${AWS_PRINCIPAL_ARN}
+              aws-default-account~AWS_DEFAULT_ACCOUNT~${AWS_DEFAULT_ACCOUNT}
+            );
+          regex="^(.*)~(.*)~(.*)$";
+          for element in ${credential_elements[@]}; do
+            if [[ ${element} =~ ${regex} ]]; then
+              setoutput="${BASH_REMATCH[1]}";
+              environment="${BASH_REMATCH[2]}";
+              credential="${BASH_REMATCH[3]}";
+              declare -a sanitize=(
+                  AWS_SESSION_TOKEN
+                  AWS_ACCESS_KEY_ID
+                  AWS_SECRET_ACCESS_KEY
+                ) ;
+              for xitem in ${sanitize[@]}; do
+                [[ ${environment} == ${xitem} ]] && credential='***' ;
+              done ;
+              echo -e "Exporting '${environment}' [ ${credential} ]" ;
+              ## eval "echo \"${environment}=${credential}\"" ;
+              echo "${environment}=${credential}" >> ${GITHUB_ENV} ;
+            fi ;
+          done ;
+        fi ;
         ####--------------------------------------------------------------------
         echo -e "\nCompleted! " ;
         ####--------------------------------------------------------------------
