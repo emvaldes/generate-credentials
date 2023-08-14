@@ -46,9 +46,6 @@ PRIVATE_KEYPAIR_FILE       Terraform AWS KeyPair (default: id_rsa)
 PYTHON_REQUIREMENTS        Listing Python packages (default: null)
 
 SANITIZE_OUTPUT            Sanitize Credentials Output (false)
-
-TERRAFORM_CLI              Install Terraform CLI (false)
-TERRAFORM_VERSION          Terraform specific target version (1.5.4)
 ```
 ```console
 UPDATE_PIP                 Update Python package management (true)
