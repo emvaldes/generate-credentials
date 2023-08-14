@@ -26,10 +26,6 @@ AWS_DEFAULT_ACCOUNT        The AWS Account number (e.g.: 123456789012).
 AWSCLI_CLI                 Install Amazon WebServices CLI (false)
 ```
 ```console
-AWSCLI_DOWNLOAD            AWS CLI Download (awscli.amazonaws.com)
-AWSCLI_PACKAGE             AWS CLI Package (e.g.: awscli-exe-linux-x86_64.zip)
-```
-```console
 AWS_DEFAULT_PROFILE        The AWS Credentials Default User (e.g.: default).
 AWS_DEFAULT_REGION         The AWS Default Region (e.g.: us-east-1)
 ```
