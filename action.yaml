@@ -75,6 +75,11 @@ inputs:
     required: false
     default: false
 
+  debuger-mode:
+    description: 'Enabling Shell Debugger'
+    required: false
+    default: false
+
   verbose-mode:
     description: 'Verbosity Control Mode'
     required: false
@@ -129,6 +134,16 @@ runs:
       id: generate-credentials
       shell: bash
       run: |
+
+        ####--------------------------------------------------------------------
+        ## Enabling Debuger-mode:
+        [[ ${{ inputs.debuger-mode }} == true ]] && set -x ;
+        ####--------------------------------------------------------------------
+
+        ####--------------------------------------------------------------------
+        completion="Skipping ...! " ;
+        ####--------------------------------------------------------------------
+        completion="Completed! " ;
 
         ####--------------------------------------------------------------------
         ## Note: Disabling masking in favor of account's visibility.
@@ -296,5 +311,10 @@ runs:
           fi ;
         done ;
         ####--------------------------------------------------------------------
-        echo -e "\nCompleted! " ;
+        echo -e "\n${completion}\n" ;
+        ####--------------------------------------------------------------------
+
+        ####--------------------------------------------------------------------
+        ## Disabling Debuger-mode:
+        [[ ${{ inputs.debuger-mode }} == true ]] && set +x ;
         ####--------------------------------------------------------------------
