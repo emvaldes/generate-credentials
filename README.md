@@ -15,6 +15,7 @@ GitHub Actions : DevOps As A Service (DaaS) - Generate Credentials
 ```console
 AWS_ACCESS_KEY_ID          Service-Account AWS Access Key-Id (e.g.: AKIA2...VT7DU).
 AWS_SECRET_ACCESS_KEY      Service-Account AWS Secret Access Key (e.g.: zBqDUNyQ0G...IbVyamSCpe)
+
 AWS_DEFAULT_ACCOUNT        The AWS Account number (e.g.: 123456789012).
 ```
 ---
