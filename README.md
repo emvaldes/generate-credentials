@@ -52,6 +52,7 @@ UPDATE_PYTHON              Update Python to the latest version (true)
 
 UPDATE_SYSTEM              Updating Operating System (false)
 UPGRADE_SYSTEM             Upgrading Operating System (false)
-
+```
+```console
 VERBOSE_MODE               Identify verbosity level (false)
 ```
