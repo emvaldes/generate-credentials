@@ -50,7 +50,7 @@ inputs:
     required: false
     default: 'devops.pem'
 
-  sanitize-creds-output:
+  sanitize-output:
     description: 'Sanitize Content Output'
     required: false
     default: false
@@ -285,7 +285,7 @@ runs:
                 AWS_ACCESS_KEY_ID
                 AWS_SECRET_ACCESS_KEY
               ) ;
-            if [[ ${{ inputs.sanitize-creds-output }} == true ]]; then
+            if [[ ${{ inputs.sanitize-output }} == true ]]; then
               for xitem in ${sanitize[@]}; do
                 [[ ${environment} == ${xitem} ]] && credential='***' ;
               done ;
