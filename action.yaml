@@ -5,16 +5,6 @@ description: 'Generate Credentials'
 
 inputs:
 
-  aws-config-file:
-    description: 'AWS Config File'
-    required: false
-    default: '.aws/config'
-
-  aws-shared-credentials-file:
-    description: 'AWS Shared Credentials File'
-    required: false
-    default: '.aws/credentials'
-
   aws-access-key-id:
     description: 'AWS Access Key-ID'
     required: true
@@ -22,6 +12,11 @@ inputs:
 
   aws-secret-access-key:
     description: 'AWS Secret Access Key'
+    required: true
+    default: ''
+
+  aws-default-account:
+    description: 'AWS Default Account Number'
     required: true
     default: ''
 
@@ -34,16 +29,6 @@ inputs:
     description: 'AWS Default Region'
     required: false
     default: 'us-east-1'
-
-  aws-default-account:
-    description: 'AWS Default Account Number'
-    required: true
-    default: ''
-
-  session-timestamp:
-    description: 'Session Time-Stamp'
-    required: false
-    default: ''
 
   devops-access-role:
     description: 'DevOps Access Role'
@@ -60,16 +45,6 @@ inputs:
     required: true
     default: 'devops'
 
-  temporary-credentials:
-    description: 'AWS Temporary Credentials'
-    required: false
-    default: false
-
-  sanitize-creds-output:
-    description: 'Sanitize Content Output'
-    required: false
-    default: false
-
   private-keypair-file:
     description: 'KeyPair Private Key'
     required: false
@@ -78,6 +53,36 @@ inputs:
   keypair-secret:
     description: 'Private Key-Pair Secret'
     required: true
+    default: false
+
+  sanitize-creds-output:
+    description: 'Sanitize Content Output'
+    required: false
+    default: false
+
+  aws-config-file:
+    description: 'AWS Config File'
+    required: false
+    default: '.aws/config'
+
+  aws-shared-credentials-file:
+    description: 'AWS Shared Credentials File'
+    required: false
+    default: '.aws/credentials'
+
+  session-timestamp:
+    description: 'Session Time-Stamp'
+    required: false
+    default: ''
+
+  temporary-credentials:
+    description: 'AWS Temporary Credentials'
+    required: false
+    default: false
+
+  verbose-mode:
+    description: 'Verbosity Control Mode'
+    required: false
     default: false
 
 ####----------------------------------------------------------------------------
