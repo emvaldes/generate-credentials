@@ -41,11 +41,12 @@ DEFAULT_TOOLS              Install packages from default list (default: null)
 DEVOPS_ACCESS_ROLE         Defines the AWS IAM Role: DevOps--Custom-Access.Role
 DEVOPS_ACCOUNT_NAME        A Deployment Service Account name (devops).
 
-PRIVATE_KEYPAIR_FILE       Terraform AWS KeyPair (default: id_rsa)
-
 PYTHON_REQUIREMENTS        Listing Python packages (default: null)
 
 SANITIZE_OUTPUT            Sanitize Credentials Output (false)
+```
+```console
+PRIVATE_KEYPAIR_FILE       Terraform AWS KeyPair (default: id_rsa)
 ```
 ```console
 UPDATE_PIP                 Update Python package management (true)
