@@ -40,9 +40,6 @@ PRIVATE_KEYPAIR_FILE       Terraform AWS KeyPair (default: id_rsa)
 
 PYTHON_REQUIREMENTS        Listing Python packages (default: null)
 
-UPDATE_SYSTEM              Updating Operating System (false)
-UPGRADE_SYSTEM             Upgrading Operating System (false)
-
 SANITIZE_OUTPUT            Sanitize Credentials Output (false)
 
 TERRAFORM_CLI              Install Terraform CLI (false)
