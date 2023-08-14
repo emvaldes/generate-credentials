@@ -50,11 +50,6 @@ inputs:
     required: false
     default: 'devops.pem'
 
-  keypair-secret:
-    description: 'Private Key-Pair Secret'
-    required: true
-    default: false
-
   sanitize-creds-output:
     description: 'Sanitize Content Output'
     required: false
